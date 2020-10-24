@@ -45,8 +45,21 @@ public class ParametrageBaseService {
         return anneeScolaireRepository.findByEnCoursIsTrue().orElse(null);
     }
 
+    public void setAllAnneeScolaireEnCoursFalse() {
+        List<AnneeScolaire> list = findAllAnneeScolaire();
+
+        if (!list.isEmpty()) {
+            list.forEach(l -> {
+                l.setEnCours(false);
+                anneeScolaireRepository.save(l);
+            });
+        }
+    }
+
     public AnneeScolaire updateAnneeScolaireEnCours(AnneeScolaire anneeScolaire, boolean status) {
         try {
+
+            setAllAnneeScolaireEnCoursFalse();
             anneeScolaire.setEnCours(status);
             anneeScolaireRepository.save(anneeScolaire);
             return anneeScolaire;

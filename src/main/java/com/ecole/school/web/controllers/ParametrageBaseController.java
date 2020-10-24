@@ -1,5 +1,7 @@
 package com.ecole.school.web.controllers;
 
+import java.util.Map;
+
 import com.ecole.school.models.AnneeScolaire;
 import com.ecole.school.pojos.AnneeScolairePOJO;
 import com.ecole.school.services.ParametrageBaseService;
@@ -81,5 +83,22 @@ public class ParametrageBaseController {
         anneeScolaire.setLibelle(anneeScolairePOJO.getLibelle());
 
         return ResponseEntity.ok(parametrageBaseService.addAnneeScolaire(anneeScolaire));
+    }
+
+    @PutMapping("annee-scolaire/encours/{id}")
+    public ResponseEntity<?> updateAnneeScolaireEnCours(@PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (body == null)
+            throw new BadRequestException("body is required");
+
+        AnneeScolaire anneeScolaire = parametrageBaseService.findAnneeScolaireById(id);
+        if (anneeScolaire == null)
+            throw new EntityNotFoundException("entity not found");
+
+        boolean status = Boolean.parseBoolean(body.get("status"));
+
+        return ResponseEntity.ok(parametrageBaseService.updateAnneeScolaireEnCours(anneeScolaire, status));
     }
 }
