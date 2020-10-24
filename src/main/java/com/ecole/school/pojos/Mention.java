@@ -7,5 +7,5 @@ public class Mention {
     private Long id;
     private String libelle;
     private boolean etat;
-    private Domaine domaine;
+    private DomainePOJO domaine;
 }

@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ecole.school.models.AnneeScolaire;
+import com.ecole.school.models.Domaine;
 import com.ecole.school.repositories.AnneeScolaireRepository;
+import com.ecole.school.repositories.DomaineRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,10 +19,13 @@ import lombok.extern.java.Log;
 @Log
 public class ParametrageBaseService {
     private AnneeScolaireRepository anneeScolaireRepository;
+    private DomaineRepository domaineRepository;
 
     @Autowired
-    public ParametrageBaseService(AnneeScolaireRepository anneeScolaireRepository) {
+    public ParametrageBaseService(AnneeScolaireRepository anneeScolaireRepository,
+                                DomaineRepository domaineRepository) {
         this.anneeScolaireRepository = anneeScolaireRepository;
+        this.domaineRepository = domaineRepository;
     }
 
     public AnneeScolaire addAnneeScolaire(AnneeScolaire anneeScolaire) {
@@ -67,5 +72,23 @@ public class ParametrageBaseService {
             log.severe(e.getLocalizedMessage());
             throw e;
         }
+    }
+
+    public Domaine addDomaine(Domaine domaine) {
+        try {
+            domaineRepository.save(domaine);
+            return domaine;
+        } catch(Exception e) {
+            log.severe(e.getLocalizedMessage());
+            throw e;
+        }
+    }
+
+    public Domaine findDomaineById(Long id) {
+        return domaineRepository.findById(id).orElse(null);
+    }
+
+    public List<Domaine> findAllDomaine() {
+        return domaineRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
     }
 }
