@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class DocumentParNiveau {
     private Long id;
-    private Document document;
+    private DocumentPOJO document;
     private Niveau niveau;
 }

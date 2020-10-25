@@ -7,7 +7,7 @@ public class Classe {
     private Long id;
     private String libelle;
     private boolean etat;
-    private Horaire horaire;
+    private HorairePOJO horaire;
     private Niveau niveau;
     private Specialite specialite;
 }

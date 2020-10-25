@@ -3,7 +3,8 @@ package com.ecole.school.pojos;
 import lombok.Data;
 
 @Data
-public class Horaire {
+public class HorairePOJO {
     private Long id;
     private String libelle;
+    private boolean archive;
 }

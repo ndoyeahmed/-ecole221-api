@@ -5,11 +5,15 @@ import java.util.List;
 
 import com.ecole.school.models.AnneeScolaire;
 import com.ecole.school.models.Cycle;
+import com.ecole.school.models.Document;
 import com.ecole.school.models.Domaine;
+import com.ecole.school.models.Horaire;
 import com.ecole.school.models.Parcours;
 import com.ecole.school.repositories.AnneeScolaireRepository;
 import com.ecole.school.repositories.CycleRepository;
+import com.ecole.school.repositories.DocumentRepository;
 import com.ecole.school.repositories.DomaineRepository;
+import com.ecole.school.repositories.HoraireRepository;
 import com.ecole.school.repositories.ParcoursRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +30,19 @@ public class ParametrageBaseService {
     private DomaineRepository domaineRepository;
     private CycleRepository cycleRepository;
     private ParcoursRepository parcoursRepository;
+    private HoraireRepository horaireRepository;
+    private DocumentRepository documentRepository;
 
     @Autowired
     public ParametrageBaseService(AnneeScolaireRepository anneeScolaireRepository, CycleRepository cycleRepository,
-                                DomaineRepository domaineRepository, ParcoursRepository parcoursRepository) {
+                                DomaineRepository domaineRepository, ParcoursRepository parcoursRepository,
+                                HoraireRepository horaireRepository, DocumentRepository documentRepository) {
         this.anneeScolaireRepository = anneeScolaireRepository;
         this.domaineRepository = domaineRepository;
         this.cycleRepository = cycleRepository;
         this.parcoursRepository = parcoursRepository;
+        this.horaireRepository = horaireRepository;
+        this.documentRepository = documentRepository;
     }
 
     // ----------------- ANNEE SCOLAIRE SERVICES
@@ -138,5 +147,43 @@ public class ParametrageBaseService {
 
     public List<Parcours> findAllParcours() {
         return parcoursRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
+    }
+
+    // ----------------- HORAIRE SERVICES
+    public Horaire addHoraire(Horaire horaire) {
+        try {
+            horaireRepository.save(horaire);
+            return horaire;
+        } catch(Exception e) {
+            log.severe(e.getLocalizedMessage());
+            throw e;
+        }
+    }
+
+    public Horaire findHoraireById(Long id) {
+        return horaireRepository.findById(id).orElse(null);
+    }
+
+    public List<Horaire> findAllHoraire() {
+        return horaireRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
+    }
+
+    // ----------------- DOCUMENT SERVICES
+    public Document addDocument(Document document) {
+        try {
+            documentRepository.save(document);
+            return document;
+        } catch(Exception e) {
+            log.severe(e.getLocalizedMessage());
+            throw e;
+        }
+    }
+
+    public Document findDocumentById(Long id) {
+        return documentRepository.findById(id).orElse(null);
+    }
+
+    public List<Document> findAllDocument() {
+        return documentRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
     }
 }

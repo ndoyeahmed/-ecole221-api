@@ -4,11 +4,15 @@ import java.util.Map;
 
 import com.ecole.school.models.AnneeScolaire;
 import com.ecole.school.models.Cycle;
+import com.ecole.school.models.Document;
 import com.ecole.school.models.Domaine;
+import com.ecole.school.models.Horaire;
 import com.ecole.school.models.Parcours;
 import com.ecole.school.pojos.AnneeScolairePOJO;
 import com.ecole.school.pojos.CyclePOJO;
+import com.ecole.school.pojos.DocumentPOJO;
 import com.ecole.school.pojos.DomainePOJO;
+import com.ecole.school.pojos.HorairePOJO;
 import com.ecole.school.pojos.ParcoursPOJO;
 import com.ecole.school.services.ParametrageBaseService;
 import com.ecole.school.web.exceptions.BadRequestException;
@@ -315,4 +319,103 @@ public class ParametrageBaseController {
         return ResponseEntity.ok(parametrageBaseService.addParcours(parcours));
     }
 
+    // ----------------- HORAIRE ENDPOINTS
+    @PostMapping("horaire")
+    public ResponseEntity<?> addHoraire(@RequestBody HorairePOJO horairePOJO) {
+        if (horairePOJO == null)
+            throw new BadRequestException("body is required");
+        if (horairePOJO.getLibelle() == null || horairePOJO.getLibelle().trim().equals(""))
+            throw new BadRequestException("libelle is required");
+
+        Horaire horaire = new Horaire();
+        horaire.setLibelle(horairePOJO.getLibelle());
+        horaire.setArchive(false);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(parametrageBaseService.addHoraire(horaire));
+    }
+
+    @GetMapping("horaire")
+    public ResponseEntity<?> getAllHoraire() {
+        return ResponseEntity.ok(parametrageBaseService.findAllHoraire());
+    }
+
+    @DeleteMapping("horaire/{id}")
+    public ResponseEntity<?> archiveHoraire(@PathVariable Long id) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        Horaire horaire = parametrageBaseService.findHoraireById(id);
+        if (horaire == null)
+            throw new EntityNotFoundException("entity not found");
+
+        horaire.setArchive(true);
+        return ResponseEntity.ok(parametrageBaseService.addHoraire(horaire));
+    }
+
+    @PutMapping("horaire/{id}")
+    public ResponseEntity<?> updateHoraire(@PathVariable Long id, @RequestBody HorairePOJO horairePOJO) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (horairePOJO == null)
+            throw new BadRequestException("body is required");
+        if (horairePOJO.getLibelle() == null || horairePOJO.getLibelle().trim().equals(""))
+            throw new BadRequestException("cycle required");
+
+        Horaire horaire = parametrageBaseService.findHoraireById(id);
+        if (horaire == null)
+            throw new EntityNotFoundException("entity not found");
+
+        horaire.setLibelle(horairePOJO.getLibelle());
+
+        return ResponseEntity.ok(parametrageBaseService.addHoraire(horaire));
+    }
+
+    // ----------------- DOCUMENT ENDPOINTS
+    @PostMapping("document")
+    public ResponseEntity<?> addDocument(@RequestBody DocumentPOJO documentPOJO) {
+        if (documentPOJO == null)
+            throw new BadRequestException("body is required");
+        if (documentPOJO.getLibelle() == null || documentPOJO.getLibelle().trim().equals(""))
+            throw new BadRequestException("libelle is required");
+
+        Document document = new Document();
+        document.setLibelle(documentPOJO.getLibelle());
+        document.setArchive(false);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(parametrageBaseService.addDocument(document));
+    }
+
+    @GetMapping("document")
+    public ResponseEntity<?> getAllDocument() {
+        return ResponseEntity.ok(parametrageBaseService.findAllDocument());
+    }
+
+    @DeleteMapping("document/{id}")
+    public ResponseEntity<?> archiveDocument(@PathVariable Long id) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        Document document = parametrageBaseService.findDocumentById(id);
+        if (document == null)
+            throw new EntityNotFoundException("entity not found");
+
+        document.setArchive(true);
+        return ResponseEntity.ok(parametrageBaseService.addDocument(document));
+    }
+
+    @PutMapping("document/{id}")
+    public ResponseEntity<?> updateDocument(@PathVariable Long id, @RequestBody DocumentPOJO documentPOJO) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (documentPOJO == null)
+            throw new BadRequestException("body is required");
+        if (documentPOJO.getLibelle() == null || documentPOJO.getLibelle().trim().equals(""))
+            throw new BadRequestException("cycle required");
+
+        Document document = parametrageBaseService.findDocumentById(id);
+        if (document == null)
+            throw new EntityNotFoundException("entity not found");
+
+        document.setLibelle(documentPOJO.getLibelle());
+
+        return ResponseEntity.ok(parametrageBaseService.addDocument(document));
+    }
 }
