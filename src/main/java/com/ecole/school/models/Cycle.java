@@ -1,5 +1,6 @@
 package com.ecole.school.models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,4 +16,6 @@ public class Cycle {
     private Long id;
     private String cycle;
     private boolean etat;
+    @Column(columnDefinition = "boolean default false")
+    private boolean archive;
 }

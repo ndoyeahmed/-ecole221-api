@@ -3,9 +3,13 @@ package com.ecole.school.web.controllers;
 import java.util.Map;
 
 import com.ecole.school.models.AnneeScolaire;
+import com.ecole.school.models.Cycle;
 import com.ecole.school.models.Domaine;
+import com.ecole.school.models.Parcours;
 import com.ecole.school.pojos.AnneeScolairePOJO;
+import com.ecole.school.pojos.CyclePOJO;
 import com.ecole.school.pojos.DomainePOJO;
+import com.ecole.school.pojos.ParcoursPOJO;
 import com.ecole.school.services.ParametrageBaseService;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
@@ -34,6 +38,7 @@ public class ParametrageBaseController {
         this.parametrageBaseService = parametrageBaseService;
     }
 
+    // ----------------- ANNEE SCOLAIRE ENDPOINTS
     @PostMapping("annee-scolaire")
     public ResponseEntity<?> addAnneeScolaire(@RequestBody AnneeScolairePOJO anneeScolaire) {
         if (anneeScolaire == null)
@@ -103,6 +108,7 @@ public class ParametrageBaseController {
         return ResponseEntity.ok(parametrageBaseService.updateAnneeScolaireEnCours(anneeScolaire, status));
     }
 
+    // ----------------- DOMAINE ENDPOINTS
     @PostMapping("domaine")
     public ResponseEntity<?> addDomaine(@RequestBody DomainePOJO domainePOJO) {
         if (domainePOJO == null)
@@ -127,9 +133,9 @@ public class ParametrageBaseController {
     public ResponseEntity<?> archiveDomaine(@PathVariable Long id) {
         if (id == null)
             throw new BadRequestException("id required");
-            Domaine domaine = parametrageBaseService.findDomaineById(id);
-            if (domaine == null)
-                throw new EntityNotFoundException("entity not found");
+        Domaine domaine = parametrageBaseService.findDomaineById(id);
+        if (domaine == null)
+            throw new EntityNotFoundException("entity not found");
 
         domaine.setArchive(true);
         return ResponseEntity.ok(parametrageBaseService.addDomaine(domaine));
@@ -170,4 +176,143 @@ public class ParametrageBaseController {
 
         return ResponseEntity.ok(parametrageBaseService.addDomaine(domaine));
     }
+
+    // ----------------- CYCLE ENDPOINTS
+    @PostMapping("cycle")
+    public ResponseEntity<?> addCycle(@RequestBody CyclePOJO cyclePOJO) {
+        if (cyclePOJO == null)
+            throw new BadRequestException("body is required");
+        if (cyclePOJO.getCycle() == null || cyclePOJO.getCycle().trim().equals(""))
+            throw new BadRequestException("cycle is required");
+
+        Cycle cycle = new Cycle();
+        cycle.setCycle(cyclePOJO.getCycle());
+        cycle.setArchive(false);
+        cycle.setEtat(true);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(parametrageBaseService.addCycle(cycle));
+    }
+
+    @GetMapping("cycle")
+    public ResponseEntity<?> getAllCycle() {
+        return ResponseEntity.ok(parametrageBaseService.findAllCycle());
+    }
+
+    @DeleteMapping("cycle/{id}")
+    public ResponseEntity<?> archiveCycle(@PathVariable Long id) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        Cycle cycle = parametrageBaseService.findCycleById(id);
+        if (cycle == null)
+            throw new EntityNotFoundException("entity not found");
+
+        cycle.setArchive(true);
+        return ResponseEntity.ok(parametrageBaseService.addCycle(cycle));
+    }
+
+    @PutMapping("cycle/{id}")
+    public ResponseEntity<?> updateCycle(@PathVariable Long id, @RequestBody CyclePOJO cyclePOJO) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (cyclePOJO == null)
+            throw new BadRequestException("body is required");
+        if (cyclePOJO.getCycle() == null || cyclePOJO.getCycle().trim().equals(""))
+            throw new BadRequestException("cycle required");
+
+        Cycle cycle = parametrageBaseService.findCycleById(id);
+        if (cycle == null)
+            throw new EntityNotFoundException("entity not found");
+
+        cycle.setEtat(cyclePOJO.isEtat());
+        cycle.setCycle(cyclePOJO.getCycle());
+
+        return ResponseEntity.ok(parametrageBaseService.addCycle(cycle));
+    }
+
+    @PutMapping("cycle/etat/{id}")
+    public ResponseEntity<?> updateCycleStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (body == null)
+            throw new BadRequestException("body is required");
+
+        Cycle cycle = parametrageBaseService.findCycleById(id);
+        if (cycle == null)
+            throw new EntityNotFoundException("entity not found");
+
+        boolean status = Boolean.parseBoolean(body.get("status"));
+        cycle.setEtat(status);
+
+        return ResponseEntity.ok(parametrageBaseService.addCycle(cycle));
+    }
+
+    // ----------------- PARCOURS ENDPOINTS
+    @PostMapping("parcours")
+    public ResponseEntity<?> addParcours(@RequestBody ParcoursPOJO parcoursPOJO) {
+        if (parcoursPOJO == null)
+            throw new BadRequestException("body is required");
+        if (parcoursPOJO.getLibelle() == null || parcoursPOJO.getLibelle().trim().equals(""))
+            throw new BadRequestException("libelle is required");
+
+        Parcours parcours = new Parcours();
+        parcours.setLibelle(parcoursPOJO.getLibelle());
+        parcours.setArchive(false);
+        parcours.setEtat(true);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(parametrageBaseService.addParcours(parcours));
+    }
+
+    @GetMapping("parcours")
+    public ResponseEntity<?> getAllParcours() {
+        return ResponseEntity.ok(parametrageBaseService.findAllParcours());
+    }
+
+    @DeleteMapping("parcours/{id}")
+    public ResponseEntity<?> archiveParcours(@PathVariable Long id) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        Parcours parcours = parametrageBaseService.findParcoursById(id);
+        if (parcours == null)
+            throw new EntityNotFoundException("entity not found");
+
+        parcours.setArchive(true);
+        return ResponseEntity.ok(parametrageBaseService.addParcours(parcours));
+    }
+
+    @PutMapping("parcours/{id}")
+    public ResponseEntity<?> updateParcours(@PathVariable Long id, @RequestBody ParcoursPOJO parcoursPOJO) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (parcoursPOJO == null)
+            throw new BadRequestException("body is required");
+        if (parcoursPOJO.getLibelle() == null || parcoursPOJO.getLibelle().trim().equals(""))
+            throw new BadRequestException("cycle required");
+
+        Parcours parcours = parametrageBaseService.findParcoursById(id);
+        if (parcours == null)
+            throw new EntityNotFoundException("entity not found");
+
+        parcours.setEtat(parcoursPOJO.isEtat());
+        parcours.setLibelle(parcoursPOJO.getLibelle());
+
+        return ResponseEntity.ok(parametrageBaseService.addParcours(parcours));
+    }
+
+    @PutMapping("parcours/etat/{id}")
+    public ResponseEntity<?> updateParcoursStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (body == null)
+            throw new BadRequestException("body is required");
+
+        Parcours parcours = parametrageBaseService.findParcoursById(id);
+        if (parcours == null)
+            throw new EntityNotFoundException("entity not found");
+
+        boolean status = Boolean.parseBoolean(body.get("status"));
+        parcours.setEtat(status);
+
+        return ResponseEntity.ok(parametrageBaseService.addParcours(parcours));
+    }
+
 }

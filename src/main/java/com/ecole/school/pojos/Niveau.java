@@ -8,7 +8,7 @@ public class Niveau {
     private String libelle;
     private int niveau;
     private boolean etat;
-    private Cycle cycle;
-    private Parcours parcours;
+    private CyclePOJO cycle;
+    private ParcoursPOJO parcours;
     private Semestre semestre;
 }
