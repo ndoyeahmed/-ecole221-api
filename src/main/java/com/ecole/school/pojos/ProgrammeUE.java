@@ -11,6 +11,6 @@ public class ProgrammeUE {
     private int nbreHeureUE;
     private int num;
     private Referentiel referentiel;
-    private Semestre semestre;
+    private SemestrePOJO semestre;
     private UE ue;
 }

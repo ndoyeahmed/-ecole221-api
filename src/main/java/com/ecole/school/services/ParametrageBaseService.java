@@ -8,12 +8,14 @@ import com.ecole.school.models.Cycle;
 import com.ecole.school.models.Document;
 import com.ecole.school.models.Domaine;
 import com.ecole.school.models.Horaire;
+import com.ecole.school.models.Mention;
 import com.ecole.school.models.Parcours;
 import com.ecole.school.repositories.AnneeScolaireRepository;
 import com.ecole.school.repositories.CycleRepository;
 import com.ecole.school.repositories.DocumentRepository;
 import com.ecole.school.repositories.DomaineRepository;
 import com.ecole.school.repositories.HoraireRepository;
+import com.ecole.school.repositories.MentionRepository;
 import com.ecole.school.repositories.ParcoursRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,17 +34,20 @@ public class ParametrageBaseService {
     private ParcoursRepository parcoursRepository;
     private HoraireRepository horaireRepository;
     private DocumentRepository documentRepository;
+    private MentionRepository mentionRepository;
 
     @Autowired
     public ParametrageBaseService(AnneeScolaireRepository anneeScolaireRepository, CycleRepository cycleRepository,
                                 DomaineRepository domaineRepository, ParcoursRepository parcoursRepository,
-                                HoraireRepository horaireRepository, DocumentRepository documentRepository) {
+                                HoraireRepository horaireRepository, DocumentRepository documentRepository,
+                                MentionRepository mentionRepository) {
         this.anneeScolaireRepository = anneeScolaireRepository;
         this.domaineRepository = domaineRepository;
         this.cycleRepository = cycleRepository;
         this.parcoursRepository = parcoursRepository;
         this.horaireRepository = horaireRepository;
         this.documentRepository = documentRepository;
+        this.mentionRepository = mentionRepository;
     }
 
     // ----------------- ANNEE SCOLAIRE SERVICES
@@ -185,5 +190,28 @@ public class ParametrageBaseService {
 
     public List<Document> findAllDocument() {
         return documentRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
+    }
+
+    // ----------------- MENTION SERVICES
+    public Mention addMention(Mention mention) {
+        try {
+            mentionRepository.save(mention);
+            return mention;
+        } catch(Exception e) {
+            log.severe(e.getLocalizedMessage());
+            throw e;
+        }
+    }
+
+    public Mention findMentionById(Long id) {
+        return mentionRepository.findById(id).orElse(null);
+    }
+
+    public List<Mention> findMentionByDomaine(Domaine domaine) {
+        return mentionRepository.findAllByDomaine(domaine).orElse(new ArrayList<>());
+    }
+
+    public List<Mention> findAllMention() {
+        return mentionRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
     }
 }

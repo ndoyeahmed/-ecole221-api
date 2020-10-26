@@ -10,5 +10,5 @@ public class Niveau {
     private boolean etat;
     private CyclePOJO cycle;
     private ParcoursPOJO parcours;
-    private Semestre semestre;
+    private SemestrePOJO semestre;
 }

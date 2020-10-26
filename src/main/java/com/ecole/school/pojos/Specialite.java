@@ -8,5 +8,5 @@ public class Specialite {
     private String libelle;
     private String num;
     private boolean etat;
-    private Mention mention;
+    private MentionPOJO mention;
 }

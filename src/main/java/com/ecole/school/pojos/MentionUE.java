@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class MentionUE {
     private Long id;
-    private Mention mention;
+    private MentionPOJO mention;
     private UE ue;
 }

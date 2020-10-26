@@ -7,12 +7,14 @@ import com.ecole.school.models.Cycle;
 import com.ecole.school.models.Document;
 import com.ecole.school.models.Domaine;
 import com.ecole.school.models.Horaire;
+import com.ecole.school.models.Mention;
 import com.ecole.school.models.Parcours;
 import com.ecole.school.pojos.AnneeScolairePOJO;
 import com.ecole.school.pojos.CyclePOJO;
 import com.ecole.school.pojos.DocumentPOJO;
 import com.ecole.school.pojos.DomainePOJO;
 import com.ecole.school.pojos.HorairePOJO;
+import com.ecole.school.pojos.MentionPOJO;
 import com.ecole.school.pojos.ParcoursPOJO;
 import com.ecole.school.services.ParametrageBaseService;
 import com.ecole.school.web.exceptions.BadRequestException;
@@ -290,7 +292,7 @@ public class ParametrageBaseController {
         if (parcoursPOJO == null)
             throw new BadRequestException("body is required");
         if (parcoursPOJO.getLibelle() == null || parcoursPOJO.getLibelle().trim().equals(""))
-            throw new BadRequestException("cycle required");
+            throw new BadRequestException("libelle required");
 
         Parcours parcours = parametrageBaseService.findParcoursById(id);
         if (parcours == null)
@@ -358,7 +360,7 @@ public class ParametrageBaseController {
         if (horairePOJO == null)
             throw new BadRequestException("body is required");
         if (horairePOJO.getLibelle() == null || horairePOJO.getLibelle().trim().equals(""))
-            throw new BadRequestException("cycle required");
+            throw new BadRequestException("libelle required");
 
         Horaire horaire = parametrageBaseService.findHoraireById(id);
         if (horaire == null)
@@ -408,7 +410,7 @@ public class ParametrageBaseController {
         if (documentPOJO == null)
             throw new BadRequestException("body is required");
         if (documentPOJO.getLibelle() == null || documentPOJO.getLibelle().trim().equals(""))
-            throw new BadRequestException("cycle required");
+            throw new BadRequestException("libelle required");
 
         Document document = parametrageBaseService.findDocumentById(id);
         if (document == null)
@@ -417,5 +419,91 @@ public class ParametrageBaseController {
         document.setLibelle(documentPOJO.getLibelle());
 
         return ResponseEntity.ok(parametrageBaseService.addDocument(document));
+    }
+
+    // ----------------- MENTION ENDPOINTS
+    @PostMapping("mention")
+    public ResponseEntity<?> addMention(@RequestBody MentionPOJO mentionPOJO) {
+        if (mentionPOJO == null)
+            throw new BadRequestException("body is required");
+        if (mentionPOJO.getLibelle() == null || mentionPOJO.getLibelle().trim().equals(""))
+            throw new BadRequestException("libelle is required");
+        if (mentionPOJO.getDomaine() == null)
+            throw new BadRequestException("domaine required");
+
+        Domaine domaine = new Domaine();
+        domaine.setId(mentionPOJO.getDomaine().getId());
+        domaine.setLibelle(mentionPOJO.getDomaine().getLibelle());
+        domaine.setEtat(mentionPOJO.getDomaine().isEtat());
+        domaine.setArchive(mentionPOJO.getDomaine().isArchive());
+
+        Mention mention = new Mention();
+        mention.setLibelle(mentionPOJO.getLibelle());
+        mention.setDomaine(domaine);
+        mention.setEtat(true);
+        mention.setArchive(false);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(parametrageBaseService.addMention(mention));
+    }
+
+    @GetMapping("mention")
+    public ResponseEntity<?> getAllMention() {
+        return ResponseEntity.ok(parametrageBaseService.findAllMention());
+    }
+
+    @DeleteMapping("mention/{id}")
+    public ResponseEntity<?> archiveMention(@PathVariable Long id) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        Mention mention = parametrageBaseService.findMentionById(id);
+        if (mention == null)
+            throw new EntityNotFoundException("entity not found");
+
+        mention.setArchive(true);
+        return ResponseEntity.ok(parametrageBaseService.addMention(mention));
+    }
+
+    @PutMapping("mention/{id}")
+    public ResponseEntity<?> updateMention(@PathVariable Long id, @RequestBody MentionPOJO mentionPOJO) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (mentionPOJO == null)
+            throw new BadRequestException("body is required");
+        if (mentionPOJO.getLibelle() == null || mentionPOJO.getLibelle().trim().equals(""))
+            throw new BadRequestException("libelle required");
+        if (mentionPOJO.getDomaine() == null)
+            throw new BadRequestException("domaine required");
+
+        Mention mention = parametrageBaseService.findMentionById(id);
+        if (mention == null)
+            throw new EntityNotFoundException("entity not found");
+
+        Domaine domaine = new Domaine();
+        domaine.setId(mentionPOJO.getDomaine().getId());
+        domaine.setLibelle(mentionPOJO.getDomaine().getLibelle());
+        domaine.setEtat(mentionPOJO.getDomaine().isEtat());
+        domaine.setArchive(mentionPOJO.getDomaine().isArchive());
+
+        mention.setLibelle(mentionPOJO.getLibelle());
+        mention.setDomaine(domaine);
+
+        return ResponseEntity.ok(parametrageBaseService.addMention(mention));
+    }
+
+    @PutMapping("mention/etat/{id}")
+    public ResponseEntity<?> updateMentionStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (body == null)
+            throw new BadRequestException("body is required");
+
+        Mention mention = parametrageBaseService.findMentionById(id);
+        if (mention == null)
+            throw new EntityNotFoundException("entity not found");
+
+        boolean status = Boolean.parseBoolean(body.get("status"));
+        mention.setEtat(status);
+
+        return ResponseEntity.ok(parametrageBaseService.addMention(mention));
     }
 }

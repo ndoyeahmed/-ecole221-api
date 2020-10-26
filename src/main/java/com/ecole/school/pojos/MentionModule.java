@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class MentionModule {
     private Long id;
-    private Mention mention;
+    private MentionPOJO mention;
     private Module module;
 }

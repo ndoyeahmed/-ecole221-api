@@ -6,5 +6,5 @@ import lombok.Data;
 public class SemestreNiveau {
     private Long id;
     private Niveau niveau;
-    private Semestre semestre;
+    private SemestrePOJO semestre;
 }
