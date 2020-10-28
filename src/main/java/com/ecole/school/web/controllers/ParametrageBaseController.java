@@ -9,13 +9,6 @@ import com.ecole.school.models.Domaine;
 import com.ecole.school.models.Horaire;
 import com.ecole.school.models.Mention;
 import com.ecole.school.models.Parcours;
-import com.ecole.school.pojos.AnneeScolairePOJO;
-import com.ecole.school.pojos.CyclePOJO;
-import com.ecole.school.pojos.DocumentPOJO;
-import com.ecole.school.pojos.DomainePOJO;
-import com.ecole.school.pojos.HorairePOJO;
-import com.ecole.school.pojos.MentionPOJO;
-import com.ecole.school.pojos.ParcoursPOJO;
 import com.ecole.school.services.ParametrageBaseService;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
@@ -46,19 +39,17 @@ public class ParametrageBaseController {
 
     // ----------------- ANNEE SCOLAIRE ENDPOINTS
     @PostMapping("annee-scolaire")
-    public ResponseEntity<?> addAnneeScolaire(@RequestBody AnneeScolairePOJO anneeScolaire) {
+    public ResponseEntity<?> addAnneeScolaire(@RequestBody AnneeScolaire anneeScolaire) {
         if (anneeScolaire == null)
             throw new BadRequestException("body is required");
         if (anneeScolaire.getLibelle() == null || anneeScolaire.getLibelle().trim().equals("anObject"))
             throw new BadRequestException("libelle required");
 
-        AnneeScolaire anneeScolaireModel = new AnneeScolaire();
-        anneeScolaireModel.setLibelle(anneeScolaire.getLibelle());
-        anneeScolaireModel.setEnCours(false);
-        anneeScolaireModel.setArchive(false);
+        anneeScolaire.setEnCours(false);
+        anneeScolaire.setArchive(false);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(parametrageBaseService.addAnneeScolaire(anneeScolaireModel));
+                .body(parametrageBaseService.addAnneeScolaire(anneeScolaire));
     }
 
     @GetMapping("annee-scolaire")
@@ -80,7 +71,7 @@ public class ParametrageBaseController {
 
     @PutMapping("annee-scolaire/{id}")
     public ResponseEntity<?> updateAnneeScolaire(@PathVariable Long id,
-            @RequestBody AnneeScolairePOJO anneeScolairePOJO) {
+            @RequestBody AnneeScolaire anneeScolairePOJO) {
         if (id == null)
             throw new BadRequestException("id required");
         if (anneeScolairePOJO == null)
@@ -116,14 +107,12 @@ public class ParametrageBaseController {
 
     // ----------------- DOMAINE ENDPOINTS
     @PostMapping("domaine")
-    public ResponseEntity<?> addDomaine(@RequestBody DomainePOJO domainePOJO) {
-        if (domainePOJO == null)
+    public ResponseEntity<?> addDomaine(@RequestBody Domaine domaine) {
+        if (domaine == null)
             throw new BadRequestException("body is required");
-        if (domainePOJO.getLibelle() == null || domainePOJO.getLibelle().trim().equals(""))
+        if (domaine.getLibelle() == null || domaine.getLibelle().trim().equals(""))
             throw new BadRequestException("libelle is required");
 
-        Domaine domaine = new Domaine();
-        domaine.setLibelle(domainePOJO.getLibelle());
         domaine.setArchive(false);
         domaine.setEtat(true);
 
@@ -148,7 +137,7 @@ public class ParametrageBaseController {
     }
 
     @PutMapping("domaine/{id}")
-    public ResponseEntity<?> updateDomaine(@PathVariable Long id, @RequestBody DomainePOJO domainePOJO) {
+    public ResponseEntity<?> updateDomaine(@PathVariable Long id, @RequestBody Domaine domainePOJO) {
         if (id == null)
             throw new BadRequestException("id required");
         if (domainePOJO == null)
@@ -185,14 +174,12 @@ public class ParametrageBaseController {
 
     // ----------------- CYCLE ENDPOINTS
     @PostMapping("cycle")
-    public ResponseEntity<?> addCycle(@RequestBody CyclePOJO cyclePOJO) {
-        if (cyclePOJO == null)
+    public ResponseEntity<?> addCycle(@RequestBody Cycle cycle) {
+        if (cycle == null)
             throw new BadRequestException("body is required");
-        if (cyclePOJO.getCycle() == null || cyclePOJO.getCycle().trim().equals(""))
+        if (cycle.getCycle() == null || cycle.getCycle().trim().equals(""))
             throw new BadRequestException("cycle is required");
 
-        Cycle cycle = new Cycle();
-        cycle.setCycle(cyclePOJO.getCycle());
         cycle.setArchive(false);
         cycle.setEtat(true);
 
@@ -217,7 +204,7 @@ public class ParametrageBaseController {
     }
 
     @PutMapping("cycle/{id}")
-    public ResponseEntity<?> updateCycle(@PathVariable Long id, @RequestBody CyclePOJO cyclePOJO) {
+    public ResponseEntity<?> updateCycle(@PathVariable Long id, @RequestBody Cycle cyclePOJO) {
         if (id == null)
             throw new BadRequestException("id required");
         if (cyclePOJO == null)
@@ -254,14 +241,12 @@ public class ParametrageBaseController {
 
     // ----------------- PARCOURS ENDPOINTS
     @PostMapping("parcours")
-    public ResponseEntity<?> addParcours(@RequestBody ParcoursPOJO parcoursPOJO) {
-        if (parcoursPOJO == null)
+    public ResponseEntity<?> addParcours(@RequestBody Parcours parcours) {
+        if (parcours == null)
             throw new BadRequestException("body is required");
-        if (parcoursPOJO.getLibelle() == null || parcoursPOJO.getLibelle().trim().equals(""))
+        if (parcours.getLibelle() == null || parcours.getLibelle().trim().equals(""))
             throw new BadRequestException("libelle is required");
 
-        Parcours parcours = new Parcours();
-        parcours.setLibelle(parcoursPOJO.getLibelle());
         parcours.setArchive(false);
         parcours.setEtat(true);
 
@@ -286,7 +271,7 @@ public class ParametrageBaseController {
     }
 
     @PutMapping("parcours/{id}")
-    public ResponseEntity<?> updateParcours(@PathVariable Long id, @RequestBody ParcoursPOJO parcoursPOJO) {
+    public ResponseEntity<?> updateParcours(@PathVariable Long id, @RequestBody Parcours parcoursPOJO) {
         if (id == null)
             throw new BadRequestException("id required");
         if (parcoursPOJO == null)
@@ -323,14 +308,12 @@ public class ParametrageBaseController {
 
     // ----------------- HORAIRE ENDPOINTS
     @PostMapping("horaire")
-    public ResponseEntity<?> addHoraire(@RequestBody HorairePOJO horairePOJO) {
-        if (horairePOJO == null)
+    public ResponseEntity<?> addHoraire(@RequestBody Horaire horaire) {
+        if (horaire == null)
             throw new BadRequestException("body is required");
-        if (horairePOJO.getLibelle() == null || horairePOJO.getLibelle().trim().equals(""))
+        if (horaire.getLibelle() == null || horaire.getLibelle().trim().equals(""))
             throw new BadRequestException("libelle is required");
 
-        Horaire horaire = new Horaire();
-        horaire.setLibelle(horairePOJO.getLibelle());
         horaire.setArchive(false);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(parametrageBaseService.addHoraire(horaire));
@@ -354,7 +337,7 @@ public class ParametrageBaseController {
     }
 
     @PutMapping("horaire/{id}")
-    public ResponseEntity<?> updateHoraire(@PathVariable Long id, @RequestBody HorairePOJO horairePOJO) {
+    public ResponseEntity<?> updateHoraire(@PathVariable Long id, @RequestBody Horaire horairePOJO) {
         if (id == null)
             throw new BadRequestException("id required");
         if (horairePOJO == null)
@@ -373,14 +356,12 @@ public class ParametrageBaseController {
 
     // ----------------- DOCUMENT ENDPOINTS
     @PostMapping("document")
-    public ResponseEntity<?> addDocument(@RequestBody DocumentPOJO documentPOJO) {
-        if (documentPOJO == null)
+    public ResponseEntity<?> addDocument(@RequestBody Document document) {
+        if (document == null)
             throw new BadRequestException("body is required");
-        if (documentPOJO.getLibelle() == null || documentPOJO.getLibelle().trim().equals(""))
+        if (document.getLibelle() == null || document.getLibelle().trim().equals(""))
             throw new BadRequestException("libelle is required");
 
-        Document document = new Document();
-        document.setLibelle(documentPOJO.getLibelle());
         document.setArchive(false);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(parametrageBaseService.addDocument(document));
@@ -404,7 +385,7 @@ public class ParametrageBaseController {
     }
 
     @PutMapping("document/{id}")
-    public ResponseEntity<?> updateDocument(@PathVariable Long id, @RequestBody DocumentPOJO documentPOJO) {
+    public ResponseEntity<?> updateDocument(@PathVariable Long id, @RequestBody Document documentPOJO) {
         if (id == null)
             throw new BadRequestException("id required");
         if (documentPOJO == null)
@@ -423,23 +404,14 @@ public class ParametrageBaseController {
 
     // ----------------- MENTION ENDPOINTS
     @PostMapping("mention")
-    public ResponseEntity<?> addMention(@RequestBody MentionPOJO mentionPOJO) {
-        if (mentionPOJO == null)
+    public ResponseEntity<?> addMention(@RequestBody Mention mention) {
+        if (mention == null)
             throw new BadRequestException("body is required");
-        if (mentionPOJO.getLibelle() == null || mentionPOJO.getLibelle().trim().equals(""))
+        if (mention.getLibelle() == null || mention.getLibelle().trim().equals(""))
             throw new BadRequestException("libelle is required");
-        if (mentionPOJO.getDomaine() == null)
+        if (mention.getDomaine() == null)
             throw new BadRequestException("domaine required");
 
-        Domaine domaine = new Domaine();
-        domaine.setId(mentionPOJO.getDomaine().getId());
-        domaine.setLibelle(mentionPOJO.getDomaine().getLibelle());
-        domaine.setEtat(mentionPOJO.getDomaine().isEtat());
-        domaine.setArchive(mentionPOJO.getDomaine().isArchive());
-
-        Mention mention = new Mention();
-        mention.setLibelle(mentionPOJO.getLibelle());
-        mention.setDomaine(domaine);
         mention.setEtat(true);
         mention.setArchive(false);
 
@@ -464,7 +436,7 @@ public class ParametrageBaseController {
     }
 
     @PutMapping("mention/{id}")
-    public ResponseEntity<?> updateMention(@PathVariable Long id, @RequestBody MentionPOJO mentionPOJO) {
+    public ResponseEntity<?> updateMention(@PathVariable Long id, @RequestBody Mention mentionPOJO) {
         if (id == null)
             throw new BadRequestException("id required");
         if (mentionPOJO == null)
@@ -478,14 +450,9 @@ public class ParametrageBaseController {
         if (mention == null)
             throw new EntityNotFoundException("entity not found");
 
-        Domaine domaine = new Domaine();
-        domaine.setId(mentionPOJO.getDomaine().getId());
-        domaine.setLibelle(mentionPOJO.getDomaine().getLibelle());
-        domaine.setEtat(mentionPOJO.getDomaine().isEtat());
-        domaine.setArchive(mentionPOJO.getDomaine().isArchive());
 
         mention.setLibelle(mentionPOJO.getLibelle());
-        mention.setDomaine(domaine);
+        mention.setDomaine(mentionPOJO.getDomaine());
 
         return ResponseEntity.ok(parametrageBaseService.addMention(mention));
     }
