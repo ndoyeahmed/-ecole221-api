@@ -1,13 +1,18 @@
 package com.ecole.school.web.controllers;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
 import com.ecole.school.models.DocumentParNiveau;
 import com.ecole.school.models.Niveau;
+import com.ecole.school.models.NiveauSpecialite;
 import com.ecole.school.models.Semestre;
 import com.ecole.school.models.SemestreNiveau;
+import com.ecole.school.models.Specialite;
 import com.ecole.school.services.ParametrageSpecialiteService;
+import com.ecole.school.services.utils.Utils;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
 
@@ -29,10 +34,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/parametrage-specialite/")
 public class ParametrageSpecialiteController {
     private ParametrageSpecialiteService parametrageSpecialiteService;
+    private Utils utils;
 
     @Autowired
-    public ParametrageSpecialiteController(ParametrageSpecialiteService parametrageSpecialiteService) {
+    public ParametrageSpecialiteController(ParametrageSpecialiteService parametrageSpecialiteService, Utils utils) {
         this.parametrageSpecialiteService = parametrageSpecialiteService;
+        this.utils = utils;
     }
 
     // ----------------- DOMAINE ENDPOINTS
@@ -144,9 +151,9 @@ public class ParametrageSpecialiteController {
         if (body == null)
             throw new BadRequestException("body is required");
 
-            Niveau niveau = parametrageSpecialiteService.findNiveauById(id);
-            if (niveau == null)
-                throw new EntityNotFoundException("entity not found");
+        Niveau niveau = parametrageSpecialiteService.findNiveauById(id);
+        if (niveau == null)
+            throw new EntityNotFoundException("entity not found");
 
         boolean status = Boolean.parseBoolean(body.get("status"));
         niveau.setEtat(status);
@@ -199,4 +206,81 @@ public class ParametrageSpecialiteController {
 
         return ResponseEntity.ok(parametrageSpecialiteService.findAllSemestreNiveauByNiveau(niveau));
     }
+
+    // ----------------- SPECIALITE ENDPOINTS
+    @PostMapping("specialite")
+    public ResponseEntity<?> addSpecialite(@RequestBody Specialite specialite)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        if (specialite == null)
+            throw new BadRequestException("body is required");
+        if (specialite.getLibelle() == null || specialite.getLibelle().trim().equals(""))
+            throw new BadRequestException("libelle is required");
+        if (specialite.getMention() == null)
+            throw new BadRequestException("mention required");
+
+        specialite.setNum(utils.generateUniqueId());
+        specialite.setArchive(false);
+        specialite.setEtat(true);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(parametrageSpecialiteService.addSpecialite(specialite));
+    }
+
+    @GetMapping("specialite")
+    public ResponseEntity<?> getAllSpecialite() {
+        return ResponseEntity.ok(parametrageSpecialiteService.findAllSpecialite());
+    }
+
+    @DeleteMapping("specialite/{id}")
+    public ResponseEntity<?> archiveSpecialite(@PathVariable Long id) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        Specialite specialite = parametrageSpecialiteService.findSpecialiteById(id);
+        if (specialite == null)
+            throw new EntityNotFoundException("entity not found");
+
+        specialite.setArchive(true);
+        return ResponseEntity.ok(parametrageSpecialiteService.addSpecialite(specialite));
+    }
+
+    @PutMapping("specialite/etat/{id}")
+    public ResponseEntity<?> updateSpecialiteStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (body == null)
+            throw new BadRequestException("body is required");
+
+            Specialite specialite = parametrageSpecialiteService.findSpecialiteById(id);
+            if (specialite == null)
+                throw new EntityNotFoundException("entity not found");
+
+        boolean status = Boolean.parseBoolean(body.get("status"));
+        specialite.setEtat(status);
+
+        return ResponseEntity.ok(parametrageSpecialiteService.addSpecialite(specialite));
+    }
+
+    // ----------------- SEMESTRE NIVEAU ENDPOINTS
+    @PostMapping("niveau-specialite")
+    public ResponseEntity<?> addNiveauSpecialite(@RequestBody List<NiveauSpecialite> niveauSpecialites) {
+        if (niveauSpecialites == null)
+            throw new BadRequestException("body is required");
+        if (niveauSpecialites.isEmpty())
+            throw new BadRequestException("body is required");
+
+        niveauSpecialites.parallelStream().forEach(d -> parametrageSpecialiteService.addNiveauSpecialite(d));
+        return ResponseEntity.status(HttpStatus.CREATED).body(niveauSpecialites);
+    }
+
+    @GetMapping("niveau-specialite/specialite/{id}")
+    public ResponseEntity<?> getAllNiveauSpecialiteBySpecialite(@PathVariable Long id) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        Specialite specialite = parametrageSpecialiteService.findSpecialiteById(id);
+        if (specialite == null)
+            throw new EntityNotFoundException("entity not found");
+
+        return ResponseEntity.ok(parametrageSpecialiteService.findAllNiveauSpecialiteBySpecialite(specialite));
+    }
+
+
 }

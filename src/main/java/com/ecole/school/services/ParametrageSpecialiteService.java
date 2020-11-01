@@ -6,13 +6,17 @@ import java.util.List;
 import com.ecole.school.models.Cycle;
 import com.ecole.school.models.DocumentParNiveau;
 import com.ecole.school.models.Niveau;
+import com.ecole.school.models.NiveauSpecialite;
 import com.ecole.school.models.Parcours;
 import com.ecole.school.models.Semestre;
 import com.ecole.school.models.SemestreNiveau;
+import com.ecole.school.models.Specialite;
 import com.ecole.school.repositories.DocumentParNiveauRepository;
 import com.ecole.school.repositories.NiveauRepository;
+import com.ecole.school.repositories.NiveauSpecialiteRepository;
 import com.ecole.school.repositories.SemestreNiveauRepository;
 import com.ecole.school.repositories.SemestreRepository;
+import com.ecole.school.repositories.SpecialiteRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,15 +32,19 @@ public class ParametrageSpecialiteService {
     private NiveauRepository niveauRepository;
     private DocumentParNiveauRepository documentParNiveauRepository;
     private SemestreNiveauRepository semestreNiveauRepository;
+    private NiveauSpecialiteRepository niveauSpecialiteRepository;
+    private SpecialiteRepository specialiteRepository;
 
     @Autowired
     public ParametrageSpecialiteService(SemestreRepository semestreRepository, NiveauRepository niveauRepository,
-            DocumentParNiveauRepository documentParNiveauRepository,
-            SemestreNiveauRepository semestreNiveauRepository) {
+            DocumentParNiveauRepository documentParNiveauRepository, SpecialiteRepository specialiteRepository,
+            SemestreNiveauRepository semestreNiveauRepository, NiveauSpecialiteRepository niveauSpecialiteRepository) {
         this.semestreRepository = semestreRepository;
         this.niveauRepository = niveauRepository;
         this.documentParNiveauRepository = documentParNiveauRepository;
         this.semestreNiveauRepository = semestreNiveauRepository;
+        this.niveauSpecialiteRepository = niveauSpecialiteRepository;
+        this.specialiteRepository = specialiteRepository;
     }
 
     // ----------------- SEMESTRE SERVICES
@@ -117,5 +125,39 @@ public class ParametrageSpecialiteService {
 
     public List<SemestreNiveau> findAllSemestreNiveauByNiveau(Niveau niveau) {
         return semestreNiveauRepository.findAllByNiveauAndArchiveFalse(niveau).orElse(new ArrayList<>());
+    }
+
+    // ----------------- SPECIALITE SERVICES
+    public Specialite addSpecialite(Specialite specialite) {
+        try {
+            specialiteRepository.save(specialite);
+            return specialite;
+        } catch (Exception e) {
+            log.severe(e.getLocalizedMessage());
+            throw e;
+        }
+    }
+
+    public Specialite findSpecialiteById(Long id) {
+        return specialiteRepository.findById(id).orElse(null);
+    }
+
+    public List<Specialite> findAllSpecialite() {
+        return specialiteRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
+    }
+
+    // ----------------- NIVEAU SPECIALITE SERVICES
+    public NiveauSpecialite addNiveauSpecialite(NiveauSpecialite niveauSpecialite) {
+        try {
+            niveauSpecialiteRepository.save(niveauSpecialite);
+            return niveauSpecialite;
+        } catch (Exception e) {
+            log.severe(e.getLocalizedMessage());
+            throw e;
+        }
+    }
+
+    public List<NiveauSpecialite> findAllNiveauSpecialiteBySpecialite(Specialite specialite) {
+        return niveauSpecialiteRepository.findAllBySpecialiteAndArchiveFalse(specialite).orElse(new ArrayList<>());
     }
 }

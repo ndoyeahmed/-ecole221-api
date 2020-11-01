@@ -1,5 +1,6 @@
 package com.ecole.school.models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,6 +19,8 @@ public class Specialite {
     private String libelle;
     private String num;
     private boolean etat;
+    @Column(columnDefinition = "boolean default false")
+    private boolean archive;
 
     @ManyToOne
     @JoinColumn(name = "mention", referencedColumnName = "id")
