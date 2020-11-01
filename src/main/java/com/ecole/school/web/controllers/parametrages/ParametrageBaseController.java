@@ -1,4 +1,4 @@
-package com.ecole.school.web.controllers;
+package com.ecole.school.web.controllers.parametrages;
 
 import java.util.Map;
 
@@ -9,7 +9,7 @@ import com.ecole.school.models.Domaine;
 import com.ecole.school.models.Horaire;
 import com.ecole.school.models.Mention;
 import com.ecole.school.models.Parcours;
-import com.ecole.school.services.ParametrageBaseService;
+import com.ecole.school.services.parametrages.*;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
 

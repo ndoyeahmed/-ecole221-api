@@ -1,4 +1,4 @@
-package com.ecole.school.web.controllers;
+package com.ecole.school.web.controllers.parametrages;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -11,7 +11,7 @@ import com.ecole.school.models.NiveauSpecialite;
 import com.ecole.school.models.Semestre;
 import com.ecole.school.models.SemestreNiveau;
 import com.ecole.school.models.Specialite;
-import com.ecole.school.services.ParametrageSpecialiteService;
+import com.ecole.school.services.parametrages.*;
 import com.ecole.school.services.utils.Utils;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
@@ -249,9 +249,9 @@ public class ParametrageSpecialiteController {
         if (body == null)
             throw new BadRequestException("body is required");
 
-            Specialite specialite = parametrageSpecialiteService.findSpecialiteById(id);
-            if (specialite == null)
-                throw new EntityNotFoundException("entity not found");
+        Specialite specialite = parametrageSpecialiteService.findSpecialiteById(id);
+        if (specialite == null)
+            throw new EntityNotFoundException("entity not found");
 
         boolean status = Boolean.parseBoolean(body.get("status"));
         specialite.setEtat(status);
@@ -259,7 +259,7 @@ public class ParametrageSpecialiteController {
         return ResponseEntity.ok(parametrageSpecialiteService.addSpecialite(specialite));
     }
 
-    // ----------------- SEMESTRE NIVEAU ENDPOINTS
+    // ----------------- NIVEAU SPECIALITE ENDPOINTS
     @PostMapping("niveau-specialite")
     public ResponseEntity<?> addNiveauSpecialite(@RequestBody List<NiveauSpecialite> niveauSpecialites) {
         if (niveauSpecialites == null)
@@ -281,6 +281,5 @@ public class ParametrageSpecialiteController {
 
         return ResponseEntity.ok(parametrageSpecialiteService.findAllNiveauSpecialiteBySpecialite(specialite));
     }
-
 
 }

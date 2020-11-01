@@ -1,4 +1,4 @@
-package com.ecole.school.services;
+package com.ecole.school.services.parametrages;
 
 import java.util.ArrayList;
 import java.util.List;
