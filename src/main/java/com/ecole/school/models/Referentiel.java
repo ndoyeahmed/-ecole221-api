@@ -2,6 +2,7 @@ package com.ecole.school.models;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -10,9 +11,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 @Entity
+@ToString
 public class Referentiel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +25,8 @@ public class Referentiel {
     private int credit;
     private int volumeHeureTotal;
     private Date date;
+    @Column(columnDefinition = "boolean default false")
+    private boolean archive;
 
     @ManyToOne
     @JoinColumn(name = "niveau", referencedColumnName = "id")
