@@ -11,7 +11,6 @@ import com.ecole.school.models.ProgrammeUE;
 import com.ecole.school.models.Referentiel;
 import com.ecole.school.models.Semestre;
 import com.ecole.school.models.Specialite;
-import com.ecole.school.services.parametrages.ParametrageBaseService;
 import com.ecole.school.services.parametrages.ParametrageModuleUEService;
 import com.ecole.school.services.parametrages.ParametrageReferentielService;
 import com.ecole.school.services.parametrages.ParametrageSpecialiteService;
@@ -55,9 +54,9 @@ public class ParametrageReferentielController {
     public ResponseEntity<?> addReferentiel(@RequestBody Referentiel referentiel) {
         if (referentiel == null)
             throw new BadRequestException("body is required");
-        if (referentiel.getNiveau() == null && referentiel.getNiveau().getId() == null)
+        if (referentiel.getNiveau() == null || referentiel.getNiveau().getId() == null)
             throw new BadRequestException("niveau required");
-        if (referentiel.getSpecialite() == null && referentiel.getSpecialite().getId() == null)
+        if (referentiel.getSpecialite() == null || referentiel.getSpecialite().getId() == null)
             throw new BadRequestException("specialite required");
 
         referentiel.setArchive(false);
@@ -97,7 +96,7 @@ public class ParametrageReferentielController {
     }
 
     @GetMapping("referentiel/niveau-specialite/{niveauId}/{specialiteId}")
-    public ResponseEntity<?> getAllReferentielBySpecialite(@PathVariable Long niveauId,
+    public ResponseEntity<?> getAllReferentielByNiveauAndSpecialite(@PathVariable Long niveauId,
             @PathVariable Long specialiteId) {
         if (niveauId == null)
             throw new BadRequestException("id niveau required");
@@ -135,11 +134,11 @@ public class ParametrageReferentielController {
             throws UnsupportedEncodingException, NoSuchAlgorithmException {
         if (programmeUE == null)
             throw new BadRequestException("body is required");
-        if (programmeUE.getReferentiel() == null && programmeUE.getReferentiel().getId() == null)
+        if (programmeUE.getReferentiel() == null || programmeUE.getReferentiel().getId() == null)
             throw new BadRequestException("referentiel required");
-        if (programmeUE.getSemestre() == null && programmeUE.getSemestre().getId() == null)
+        if (programmeUE.getSemestre() == null || programmeUE.getSemestre().getId() == null)
             throw new BadRequestException("semestre required");
-        if (programmeUE.getUe() == null && programmeUE.getUe().getId() == null)
+        if (programmeUE.getUe() == null || programmeUE.getUe().getId() == null)
             throw new BadRequestException("ue required");
 
         programmeUE.setCode(utils.generateUniqueId());
@@ -217,9 +216,9 @@ public class ParametrageReferentielController {
             throws UnsupportedEncodingException, NoSuchAlgorithmException {
         if (programmeModule == null)
             throw new BadRequestException("body is required");
-        if (programmeModule.getModule() == null && programmeModule.getModule().getId() == null)
+        if (programmeModule.getModule() == null || programmeModule.getModule().getId() == null)
             throw new BadRequestException("module required");
-        if (programmeModule.getProgrammeUE() == null && programmeModule.getProgrammeUE().getId() == null)
+        if (programmeModule.getProgrammeUE() == null || programmeModule.getProgrammeUE().getId() == null)
             throw new BadRequestException("programmeUE required");
 
         programmeModule.setCode(utils.generateUniqueId());
