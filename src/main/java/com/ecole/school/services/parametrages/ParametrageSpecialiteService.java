@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ecole.school.models.Cycle;
+import com.ecole.school.models.Document;
 import com.ecole.school.models.DocumentParNiveau;
 import com.ecole.school.models.Niveau;
 import com.ecole.school.models.NiveauSpecialite;
@@ -108,6 +109,10 @@ public class ParametrageSpecialiteService {
         return documentParNiveauRepository.findById(id).orElse(null);
     }
 
+    public DocumentParNiveau findDocumentParNiveauByNiveauAndDocument(Niveau niveau, Document document) {
+        return documentParNiveauRepository.findByNiveauAndDocumentAndArchiveFalse(niveau, document).orElse(null);
+    }
+
     public List<DocumentParNiveau> findAllDocumentParNiveauByNiveau(Niveau niveau) {
         return documentParNiveauRepository.findAllByNiveauAndArchiveFalse(niveau).orElse(new ArrayList<>());
     }
@@ -159,6 +164,10 @@ public class ParametrageSpecialiteService {
         }
     }
 
+    public SemestreNiveau findSemestreNiveauBySemestreAndNiveau(Semestre semestre, Niveau niveau) {
+        return semestreNiveauRepository.findBySemestreAndNiveauAndArchiveFalse(semestre, niveau).orElse(null);
+    }
+
     // ----------------- SPECIALITE SERVICES
     public Specialite addSpecialite(Specialite specialite) {
         try {
@@ -187,6 +196,14 @@ public class ParametrageSpecialiteService {
             log.severe(e.getLocalizedMessage());
             throw e;
         }
+    }
+
+    public NiveauSpecialite findNiveauSpecialiteById(Long id) {
+        return niveauSpecialiteRepository.findById(id).orElse(null);
+    }
+
+    public NiveauSpecialite findNiveauSpecialiteByNiveauAndSpecialite(Niveau niveau, Specialite specialite) {
+        return niveauSpecialiteRepository.findByNiveauAndSpecialiteAndArchiveFalse(niveau, specialite).orElse(null);
     }
 
     public List<NiveauSpecialite> findAllNiveauSpecialiteBySpecialite(Specialite specialite) {

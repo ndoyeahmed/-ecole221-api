@@ -162,7 +162,7 @@ public class ParametrageSpecialiteController {
     }
 
     @PutMapping("niveau/{id}")
-    public ResponseEntity<?> updateDomaine(@PathVariable Long id, @RequestBody Niveau niveauPOJO) {
+    public ResponseEntity<?> updateNiveau(@PathVariable Long id, @RequestBody Niveau niveauPOJO) {
         if (id == null)
             throw new BadRequestException("id required");
         if (niveauPOJO == null)
@@ -195,7 +195,11 @@ public class ParametrageSpecialiteController {
         if (documentParNiveaus.isEmpty())
             throw new BadRequestException("body is required");
 
-        documentParNiveaus.parallelStream().forEach(d -> parametrageSpecialiteService.addDocumentParNiveau(d));
+        documentParNiveaus.parallelStream().forEach(d -> {
+            if (parametrageSpecialiteService.findDocumentParNiveauByNiveauAndDocument(d.getNiveau(), d.getDocument()) == null) {
+                parametrageSpecialiteService.addDocumentParNiveau(d)
+            }
+        });
         return ResponseEntity.status(HttpStatus.CREATED).body(documentParNiveaus);
     }
 
@@ -248,7 +252,11 @@ public class ParametrageSpecialiteController {
         if (semestreNiveaus.isEmpty())
             throw new BadRequestException("body is required");
 
-        semestreNiveaus.parallelStream().forEach(d -> parametrageSpecialiteService.addSemestreNiveau(d));
+        semestreNiveaus.parallelStream().forEach(d -> {
+            if (parametrageSpecialiteService.findSemestreNiveauBySemestreAndNiveau(d.getSemestre(),d.getNiveau()) == null) {
+                parametrageSpecialiteService.addSemestreNiveau(d)
+            }
+        });
         return ResponseEntity.status(HttpStatus.CREATED).body(semestreNiveaus);
     }
 
@@ -344,6 +352,29 @@ public class ParametrageSpecialiteController {
         return ResponseEntity.ok(parametrageSpecialiteService.addSpecialite(specialite));
     }
 
+    @PutMapping("specialite/{id}")
+    public ResponseEntity<?> updateSpecialite(@PathVariable Long id, @RequestBody Specialite specialitePOJO) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (specialitePOJO == null)
+            throw new BadRequestException("body is required");
+        if (specialitePOJO.getLibelle() == null || specialitePOJO.getLibelle().trim().equals(""))
+            throw new BadRequestException("libelle required");
+        if (specialitePOJO.getMention() == null || specialitePOJO.getMention().getId() == null)
+            throw new BadRequestException("cycle required");
+
+        Specialite specialite = parametrageSpecialiteService.findSpecialiteById(id);
+        if (specialite == null)
+            throw new EntityNotFoundException("entity not found");
+
+        specialite.setEtat(specialitePOJO.isEtat());
+        specialite.setLibelle(specialitePOJO.getLibelle());
+        specialite.setMention(specialitePOJO.getMention());
+
+        return ResponseEntity.ok(parametrageSpecialiteService.addSpecialite(specialite));
+    }
+
+
     // ----------------- NIVEAU SPECIALITE ENDPOINTS
     @PostMapping("niveau-specialite")
     public ResponseEntity<?> addNiveauSpecialite(@RequestBody List<NiveauSpecialite> niveauSpecialites) {
@@ -352,7 +383,11 @@ public class ParametrageSpecialiteController {
         if (niveauSpecialites.isEmpty())
             throw new BadRequestException("body is required");
 
-        niveauSpecialites.parallelStream().forEach(d -> parametrageSpecialiteService.addNiveauSpecialite(d));
+        niveauSpecialites.parallelStream().forEach(d -> {
+            if (parametrageSpecialiteService.findNiveauSpecialiteByNiveauAndSpecialite(d.getNiveau(), d.getSpecialite()) == null) {
+                parametrageSpecialiteService.addNiveauSpecialite(d);
+            }
+        });
         return ResponseEntity.status(HttpStatus.CREATED).body(niveauSpecialites);
     }
 
@@ -365,6 +400,18 @@ public class ParametrageSpecialiteController {
             throw new EntityNotFoundException("entity not found");
 
         return ResponseEntity.ok(parametrageSpecialiteService.findAllNiveauSpecialiteBySpecialite(specialite));
+    }
+
+    @DeleteMapping("niveau-specialite/{id}")
+    public ResponseEntity<?> archiveNiveauSpecialite(@PathVariable Long id) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        NiveauSpecialite niveauSpecialite = parametrageSpecialiteService.findNiveauSpecialiteById(id);
+        if (niveauSpecialite == null)
+            throw new EntityNotFoundException("entity not found");
+
+        niveauSpecialite.setArchive(true);
+        return ResponseEntity.ok(parametrageSpecialiteService.addNiveauSpecialite(niveauSpecialite));
     }
 
 }

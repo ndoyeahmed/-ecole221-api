@@ -3,6 +3,7 @@ package com.ecole.school.repositories;
 import java.util.List;
 import java.util.Optional;
 
+import com.ecole.school.models.Document;
 import com.ecole.school.models.DocumentParNiveau;
 import com.ecole.school.models.Niveau;
 
@@ -14,4 +15,6 @@ public interface DocumentParNiveauRepository extends JpaRepository<DocumentParNi
     Optional<List<DocumentParNiveau>> findAllByNiveauAndArchiveFalse(Niveau niveau);
 
     Optional<List<DocumentParNiveau>> findAllByNiveauAndFournirAndArchiveFalse(Niveau niveau, Boolean fournir);
+
+    Optional<DocumentParNiveau> findByNiveauAndDocumentAndArchiveFalse(Niveau niveau, Document document);
 }
