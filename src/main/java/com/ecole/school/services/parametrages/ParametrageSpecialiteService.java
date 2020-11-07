@@ -93,10 +93,6 @@ public class ParametrageSpecialiteService {
         return niveauRepository.findAllByParcours(parcours).orElse(new ArrayList<>());
     }
 
-    public List<Niveau> findAllNiveauBySemestre(Semestre semestre) {
-        return niveauRepository.findAllBySemestre(semestre).orElse(new ArrayList<>());
-    }
-
     // ----------------- DOCUMENT PAR NIVEAU SERVICES
     public DocumentParNiveau addDocumentParNiveau(DocumentParNiveau documentParNiveau) {
         try {
@@ -108,8 +104,16 @@ public class ParametrageSpecialiteService {
         }
     }
 
+    public DocumentParNiveau findDocumentParNiveauById(Long id) {
+        return documentParNiveauRepository.findById(id).orElse(null);
+    }
+
     public List<DocumentParNiveau> findAllDocumentParNiveauByNiveau(Niveau niveau) {
         return documentParNiveauRepository.findAllByNiveauAndArchiveFalse(niveau).orElse(new ArrayList<>());
+    }
+
+    public List<DocumentParNiveau> findAllDocumentParNiveauByNiveauAndFournir(Niveau niveau, boolean fournir) {
+        return documentParNiveauRepository.findAllByNiveauAndFournirAndArchiveFalse(niveau, fournir).orElse(new ArrayList<>());
     }
 
     // ----------------- SEMESTRE PAR NIVEAU SERVICES
@@ -125,6 +129,34 @@ public class ParametrageSpecialiteService {
 
     public List<SemestreNiveau> findAllSemestreNiveauByNiveau(Niveau niveau) {
         return semestreNiveauRepository.findAllByNiveauAndArchiveFalse(niveau).orElse(new ArrayList<>());
+    }
+
+    public SemestreNiveau findSemestreNiveauById(Long id) {
+        return semestreNiveauRepository.findById(id).orElse(null);
+    }
+
+    public void setAllSemestreNiveauEnCoursFalseByNiveau(Niveau niveau) {
+        List<SemestreNiveau> list = findAllSemestreNiveauByNiveau(niveau);
+
+        if (!list.isEmpty()) {
+            list.forEach(l -> {
+                l.setEnCours(false);
+                semestreNiveauRepository.save(l);
+            });
+        }
+    }
+
+    public SemestreNiveau updateSemestreNiveauEnCours(SemestreNiveau semestreNiveau, boolean status, Niveau niveau) {
+        try {
+
+            setAllSemestreNiveauEnCoursFalseByNiveau(niveau);
+            semestreNiveau.setEnCours(status);
+            semestreNiveauRepository.save(semestreNiveau);
+            return semestreNiveau;
+        } catch(Exception e) {
+            log.severe(e.getLocalizedMessage());
+            throw e;
+        }
     }
 
     // ----------------- SPECIALITE SERVICES

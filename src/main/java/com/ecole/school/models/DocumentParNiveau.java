@@ -18,6 +18,8 @@ public class DocumentParNiveau {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(columnDefinition = "boolean default false")
+    private boolean fournir;
+    @Column(columnDefinition = "boolean default false")
     private boolean archive;
 
     @ManyToOne

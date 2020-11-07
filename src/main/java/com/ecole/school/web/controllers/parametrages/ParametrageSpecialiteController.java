@@ -42,7 +42,7 @@ public class ParametrageSpecialiteController {
         this.utils = utils;
     }
 
-    // ----------------- DOMAINE ENDPOINTS
+    // ----------------- SEMESTRE ENDPOINTS
     @PostMapping("semestre")
     public ResponseEntity<?> addSemestre(@RequestBody Semestre semestre) {
         if (semestre == null)
@@ -184,6 +184,35 @@ public class ParametrageSpecialiteController {
         return ResponseEntity.ok(parametrageSpecialiteService.findAllDocumentParNiveauByNiveau(niveau));
     }
 
+    @PutMapping("document-par-niveau/niveau/fournir/{niveauId}")
+    public ResponseEntity<?> getAllDocumentParNiveauByNiveauAndFournir(@PathVariable Long niveauId,
+            @RequestBody Map<String, String> body) {
+        if (niveauId == null)
+            throw new BadRequestException("niveauId required");
+        if (body == null)
+            throw new BadRequestException("body is required");
+
+        Niveau niveau = parametrageSpecialiteService.findNiveauById(niveauId);
+        if (niveau == null)
+            throw new EntityNotFoundException("entity not found");
+
+        boolean status = Boolean.parseBoolean(body.get("status"));
+
+        return ResponseEntity.ok(parametrageSpecialiteService.findAllDocumentParNiveauByNiveauAndFournir(niveau, status));
+    }
+
+    @DeleteMapping("document-par-niveau/{id}")
+    public ResponseEntity<?> archiveDocumentParNiveau(@PathVariable Long id) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        DocumentParNiveau documentParNiveau = parametrageSpecialiteService.findDocumentParNiveauById(id);
+        if (documentParNiveau == null)
+            throw new EntityNotFoundException("entity not found");
+
+        documentParNiveau.setArchive(true);
+        return ResponseEntity.ok(parametrageSpecialiteService.addDocumentParNiveau(documentParNiveau));
+    }
+
     // ----------------- SEMESTRE NIVEAU ENDPOINTS
     @PostMapping("semestre-niveau")
     public ResponseEntity<?> addSemestreNiveau(@RequestBody List<SemestreNiveau> semestreNiveaus) {
@@ -205,6 +234,35 @@ public class ParametrageSpecialiteController {
             throw new EntityNotFoundException("entity not found");
 
         return ResponseEntity.ok(parametrageSpecialiteService.findAllSemestreNiveauByNiveau(niveau));
+    }
+
+    @PutMapping("semestre-niveau/encours/{id}")
+    public ResponseEntity<?> updateSemestreNiveauEnCours(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (body == null)
+            throw new BadRequestException("body is required");
+
+        SemestreNiveau semestreNiveau = parametrageSpecialiteService.findSemestreNiveauById(id);
+        if (semestreNiveau == null)
+            throw new EntityNotFoundException("entity not found");
+
+        boolean status = Boolean.parseBoolean(body.get("status"));
+
+        return ResponseEntity.ok(parametrageSpecialiteService.updateSemestreNiveauEnCours(semestreNiveau, status,
+                semestreNiveau.getNiveau()));
+    }
+
+    @DeleteMapping("semestre-niveau/{id}")
+    public ResponseEntity<?> archiveSemestreNiveau(@PathVariable Long id) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        SemestreNiveau semestreNiveau = parametrageSpecialiteService.findSemestreNiveauById(id);
+        if (semestreNiveau == null)
+            throw new EntityNotFoundException("entity not found");
+
+        semestreNiveau.setArchive(true);
+        return ResponseEntity.ok(parametrageSpecialiteService.addSemestreNiveau(semestreNiveau));
     }
 
     // ----------------- SPECIALITE ENDPOINTS

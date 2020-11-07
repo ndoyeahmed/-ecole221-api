@@ -12,4 +12,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DocumentParNiveauRepository extends JpaRepository<DocumentParNiveau, Long> {
     Optional<List<DocumentParNiveau>> findAllByNiveauAndArchiveFalse(Niveau niveau);
+
+    Optional<List<DocumentParNiveau>> findAllByNiveauAndFournirAndArchiveFalse(Niveau niveau, Boolean fournir);
 }

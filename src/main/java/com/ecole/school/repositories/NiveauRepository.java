@@ -6,7 +6,6 @@ import java.util.Optional;
 import com.ecole.school.models.Cycle;
 import com.ecole.school.models.Niveau;
 import com.ecole.school.models.Parcours;
-import com.ecole.school.models.Semestre;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -19,6 +18,4 @@ public interface NiveauRepository extends JpaRepository<Niveau, Long> {
     Optional<List<Niveau>> findAllByCycle(Cycle cycle);
 
     Optional<List<Niveau>> findAllByParcours(Parcours parcours);
-
-    Optional<List<Niveau>> findAllBySemestre(Semestre semestre);
 }

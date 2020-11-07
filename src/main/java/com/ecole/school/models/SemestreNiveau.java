@@ -17,6 +17,8 @@ public class SemestreNiveau {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(columnDefinition = "boolean default false")
+    private boolean enCours;
+    @Column(columnDefinition = "boolean default false")
     private boolean archive;
 
     @ManyToOne
