@@ -161,6 +161,32 @@ public class ParametrageSpecialiteController {
         return ResponseEntity.ok(parametrageSpecialiteService.addNiveau(niveau));
     }
 
+    @PutMapping("niveau/{id}")
+    public ResponseEntity<?> updateDomaine(@PathVariable Long id, @RequestBody Niveau niveauPOJO) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (niveauPOJO == null)
+            throw new BadRequestException("body is required");
+        if (niveauPOJO.getLibelle() == null || niveauPOJO.getLibelle().trim().equals(""))
+            throw new BadRequestException("libelle required");
+        if (niveauPOJO.getCycle() == null || niveauPOJO.getCycle().getId() == null)
+            throw new BadRequestException("cycle required");
+        if (niveauPOJO.getParcours() == null || niveauPOJO.getParcours().getId() == null)
+            throw new BadRequestException("parcours required");
+
+        Niveau niveau = parametrageSpecialiteService.findNiveauById(id);
+        if (niveau == null)
+            throw new EntityNotFoundException("entity not found");
+
+        niveau.setEtat(niveauPOJO.isEtat());
+        niveau.setLibelle(niveauPOJO.getLibelle());
+        niveau.setNiveau(niveauPOJO.getNiveau());
+        niveau.setCycle(niveauPOJO.getCycle());
+        niveau.setParcours(niveauPOJO.getParcours());
+
+        return ResponseEntity.ok(parametrageSpecialiteService.addNiveau(niveau));
+    }
+
     // ----------------- DOCUMENT PAR NIVEAU ENDPOINTS
     @PostMapping("document-par-niveau")
     public ResponseEntity<?> addDocumentParNiveau(@RequestBody List<DocumentParNiveau> documentParNiveaus) {
@@ -198,7 +224,8 @@ public class ParametrageSpecialiteController {
 
         boolean status = Boolean.parseBoolean(body.get("status"));
 
-        return ResponseEntity.ok(parametrageSpecialiteService.findAllDocumentParNiveauByNiveauAndFournir(niveau, status));
+        return ResponseEntity
+                .ok(parametrageSpecialiteService.findAllDocumentParNiveauByNiveauAndFournir(niveau, status));
     }
 
     @DeleteMapping("document-par-niveau/{id}")
