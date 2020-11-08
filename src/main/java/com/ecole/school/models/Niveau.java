@@ -31,7 +31,4 @@ public class Niveau {
     @ManyToOne
     @JoinColumn(name = "parcours", referencedColumnName = "id")
     private Parcours parcours;
-    @ManyToOne
-    @JoinColumn(name = "semestre", referencedColumnName = "id")
-    private Semestre semestre;
 }
