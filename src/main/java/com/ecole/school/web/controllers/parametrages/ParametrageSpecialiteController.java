@@ -402,6 +402,17 @@ public class ParametrageSpecialiteController {
         return ResponseEntity.ok(parametrageSpecialiteService.findAllNiveauSpecialiteBySpecialite(specialite));
     }
 
+    @GetMapping("niveau-specialite/niveau/{id}")
+    public ResponseEntity<?> getAllNiveauSpecialiteByNiveau(@PathVariable Long id) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        Niveau niveau = parametrageSpecialiteService.findNiveauById(id);
+        if (niveau == null)
+            throw new EntityNotFoundException("entity not found");
+
+        return ResponseEntity.ok(parametrageSpecialiteService.findAllNiveauSpecialiteByNiveau(niveau));
+    }
+
     @DeleteMapping("niveau-specialite/{id}")
     public ResponseEntity<?> archiveNiveauSpecialite(@PathVariable Long id) {
         if (id == null)
@@ -413,5 +424,4 @@ public class ParametrageSpecialiteController {
         niveauSpecialite.setArchive(true);
         return ResponseEntity.ok(parametrageSpecialiteService.addNiveauSpecialite(niveauSpecialite));
     }
-
 }

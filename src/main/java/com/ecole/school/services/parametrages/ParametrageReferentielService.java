@@ -66,6 +66,10 @@ public class ParametrageReferentielService {
     public List<Referentiel> findAllReferentielByNiveauAndSpecialite(Niveau niveau, Specialite specialite) {
         return referentielRepository.findAllByNiveauAndSpecialiteAndArchiveFalse(niveau, specialite).orElse(new ArrayList<>());
     }
+    
+    public Referentiel findReferentielByNiveauAndSpecialiteAndAnnee(Niveau niveau, Specialite specialite, int annee) {
+        return referentielRepository.findByNiveauAndSpecialiteAndAnneeAndArchiveFalse(niveau, specialite, annee).orElse(null);
+    }
 
     // ----------------- PROGRAMME_UE SERVICES
     public ProgrammeUE addProgrammeUE(ProgrammeUE programmeUE) {

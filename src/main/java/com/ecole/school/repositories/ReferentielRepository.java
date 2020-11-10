@@ -19,4 +19,6 @@ public interface ReferentielRepository extends JpaRepository<Referentiel, Long> 
     Optional<List<Referentiel>> findAllBySpecialiteAndArchiveFalse(Specialite specialite);
 
     Optional<List<Referentiel>> findAllByNiveauAndSpecialiteAndArchiveFalse(Niveau niveau, Specialite specialite);
+
+    Optional<Referentiel> findByNiveauAndSpecialiteAndAnneeAndArchiveFalse(Niveau niveau, Specialite specialite, int annee);
 }

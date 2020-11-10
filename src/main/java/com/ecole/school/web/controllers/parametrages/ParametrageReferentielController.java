@@ -3,6 +3,7 @@ package com.ecole.school.web.controllers.parametrages;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.Map;
 
 import com.ecole.school.models.Module;
 import com.ecole.school.models.Niveau;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -126,6 +128,29 @@ public class ParametrageReferentielController {
 
         referentiel.setArchive(true);
         return ResponseEntity.ok(parametrageReferentielService.addReferentiel(referentiel));
+    }
+
+    @PutMapping("referentiel/niveau/specialite/annee")
+    public ResponseEntity<?> getReferentielByNiveauAndSpecialiteAndAnnee(@RequestBody Map<String, String> body) {
+        if (body == null)
+            throw new BadRequestException("body required");
+        if (body.get("niveauId") == null)
+            throw new BadRequestException("niveauId required");
+        if (body.get("specialiteId") == null)
+            throw new BadRequestException("specialiteId required");
+        if (body.get("annee") == null)
+            throw new BadRequestException("annee required");
+
+        Niveau niveau = parametrageSpecialiteService.findNiveauById(Long.valueOf(body.get("niveauId")));
+        Specialite specialite = parametrageSpecialiteService.findSpecialiteById(Long.valueOf(body.get("specialiteId")));
+        if (niveau == null)
+            throw new EntityNotFoundException("entity not found");
+        if (specialite == null)
+            throw new EntityNotFoundException("entity not found");
+
+        int annee = Integer.parseInt(body.get("annee"));
+
+        return ResponseEntity.ok(parametrageReferentielService.findReferentielByNiveauAndSpecialiteAndAnnee(niveau, specialite, annee));
     }
 
     // ----------------- PROGRAMME UE ENDPOINTS

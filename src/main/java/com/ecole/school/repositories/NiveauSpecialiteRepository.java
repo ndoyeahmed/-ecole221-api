@@ -15,4 +15,6 @@ public interface NiveauSpecialiteRepository extends JpaRepository<NiveauSpeciali
     Optional<List<NiveauSpecialite>> findAllBySpecialiteAndArchiveFalse(Specialite specialite);
 
     Optional<NiveauSpecialite> findByNiveauAndSpecialiteAndArchiveFalse(Niveau niveau, Specialite specialite);
+
+    Optional<List<NiveauSpecialite>> findAllByNiveauAndArchiveFalse(Niveau niveau);
 }

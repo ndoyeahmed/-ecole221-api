@@ -209,4 +209,8 @@ public class ParametrageSpecialiteService {
     public List<NiveauSpecialite> findAllNiveauSpecialiteBySpecialite(Specialite specialite) {
         return niveauSpecialiteRepository.findAllBySpecialiteAndArchiveFalse(specialite).orElse(new ArrayList<>());
     }
+
+    public List<NiveauSpecialite> findAllNiveauSpecialiteByNiveau(Niveau niveau) {
+        return niveauSpecialiteRepository.findAllByNiveauAndArchiveFalse(niveau).orElse(new ArrayList<>());
+    }
 }
