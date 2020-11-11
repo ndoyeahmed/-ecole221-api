@@ -58,6 +58,10 @@ public class ParametrageClasseService {
         return classeRepository.findById(id).orElse(null);
     }
 
+    public Classe findClasseByNiveauAndSpecialiteAndHoraire(Niveau niveau, Specialite specialite, Horaire horaire) {
+        return classeRepository.findByNiveauAndSpecialiteAndHoraireAndArchiveFalse(niveau, specialite, horaire).orElse(null);
+    }
+
     public List<Classe> findAllClasse() {
         return classeRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
     }

@@ -22,6 +22,9 @@ public class SousClasse {
     private boolean archive;
 
     @ManyToOne
+    @JoinColumn(name = "horaire", referencedColumnName = "id")
+    private Horaire horaire;
+    @ManyToOne
     @JoinColumn(name = "niveau", referencedColumnName = "id")
     private Niveau niveau;
     @ManyToOne

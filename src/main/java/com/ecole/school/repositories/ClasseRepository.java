@@ -21,5 +21,7 @@ public interface ClasseRepository extends JpaRepository<Classe, Long> {
 
     Optional<List<Classe>> findAllByNiveauAndSpecialiteAndArchiveFalse(Niveau niveau, Specialite specialite);
 
+    Optional<Classe> findByNiveauAndSpecialiteAndHoraireAndArchiveFalse(Niveau niveau, Specialite specialite, Horaire horaire);
+
     Optional<List<Classe>> findAllByHoraireAndArchiveFalse(Horaire horaire);
 }

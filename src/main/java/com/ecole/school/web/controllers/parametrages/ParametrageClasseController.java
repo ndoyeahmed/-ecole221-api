@@ -1,6 +1,7 @@
 package com.ecole.school.web.controllers.parametrages;
 
 import com.ecole.school.models.Classe;
+import com.ecole.school.models.ClasseSousClasse;
 import com.ecole.school.models.Niveau;
 import com.ecole.school.models.SousClasse;
 import com.ecole.school.models.Specialite;
@@ -34,7 +35,8 @@ public class ParametrageClasseController {
 
     @Autowired
     public ParametrageClasseController(ParametrageReferentielService parametrageReferentielService, Utils utils,
-            ParametrageSpecialiteService parametrageSpecialiteService, ParametrageClasseService parametrageClasseService) {
+            ParametrageSpecialiteService parametrageSpecialiteService,
+            ParametrageClasseService parametrageClasseService) {
         this.utils = utils;
         this.parametrageReferentielService = parametrageReferentielService;
         this.parametrageSpecialiteService = parametrageSpecialiteService;
@@ -55,11 +57,14 @@ public class ParametrageClasseController {
         if (classe.getHoraire() == null || classe.getHoraire().getId() == null)
             throw new BadRequestException("horaire required");
 
+        if (parametrageClasseService.findClasseByNiveauAndSpecialiteAndHoraire(classe.getNiveau(),
+                classe.getSpecialite(), classe.getHoraire()) != null)
+            throw new BadRequestException("classe already exist");
+
         classe.setArchive(false);
         classe.setEtat(true);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(parametrageClasseService.addClasse(classe));
+        return ResponseEntity.status(HttpStatus.CREATED).body(parametrageClasseService.addClasse(classe));
     }
 
     @GetMapping("classe")
@@ -108,8 +113,7 @@ public class ParametrageClasseController {
         if (specialite == null)
             throw new EntityNotFoundException("entity not found");
 
-        return ResponseEntity
-                .ok(parametrageClasseService.findAllClasseByNiveauAndSpecialite(niveau, specialite));
+        return ResponseEntity.ok(parametrageClasseService.findAllClasseByNiveauAndSpecialite(niveau, specialite));
     }
 
     @DeleteMapping("classe/{id}")
@@ -135,12 +139,26 @@ public class ParametrageClasseController {
             throw new BadRequestException("niveau required");
         if (sousClasse.getSpecialite() == null || sousClasse.getSpecialite().getId() == null)
             throw new BadRequestException("specialite required");
+        if (sousClasse.getHoraire() == null || sousClasse.getHoraire().getId() == null)
+            throw new BadRequestException("horaire required");
+
+        Classe classe = parametrageClasseService.findClasseByNiveauAndSpecialiteAndHoraire(sousClasse.getNiveau(),
+        sousClasse.getSpecialite(), sousClasse.getHoraire());
+        if (classe == null) throw new BadRequestException("can not bind to any existing classe");
 
         sousClasse.setArchive(false);
         sousClasse.setEtat(true);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(parametrageClasseService.addSousClasse(sousClasse));
+        sousClasse = parametrageClasseService.addSousClasse(sousClasse);
+
+        ClasseSousClasse classeSousClasse = new ClasseSousClasse();
+        classeSousClasse.setClasse(classe);
+        classeSousClasse.setSousClasse(sousClasse);
+        classeSousClasse.setArchive(false);
+        
+        parametrageClasseService.addClasseSousClasse(classeSousClasse);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(sousClasse);
     }
 
     @GetMapping("sous-classe")
@@ -189,8 +207,7 @@ public class ParametrageClasseController {
         if (specialite == null)
             throw new EntityNotFoundException("entity not found");
 
-        return ResponseEntity
-                .ok(parametrageClasseService.findAllSousClasseByNiveauAndSpecialite(niveau, specialite));
+        return ResponseEntity.ok(parametrageClasseService.findAllSousClasseByNiveauAndSpecialite(niveau, specialite));
     }
 
     @DeleteMapping("sous-classe/{id}")
