@@ -1,8 +1,12 @@
 package com.ecole.school.web.controllers.parametrages;
 
+import java.util.List;
+
 import com.ecole.school.models.Classe;
+import com.ecole.school.models.ClasseReferentiel;
 import com.ecole.school.models.ClasseSousClasse;
 import com.ecole.school.models.Niveau;
+import com.ecole.school.models.Referentiel;
 import com.ecole.school.models.SousClasse;
 import com.ecole.school.models.Specialite;
 import com.ecole.school.services.parametrages.ParametrageClasseService;
@@ -143,8 +147,9 @@ public class ParametrageClasseController {
             throw new BadRequestException("horaire required");
 
         Classe classe = parametrageClasseService.findClasseByNiveauAndSpecialiteAndHoraire(sousClasse.getNiveau(),
-        sousClasse.getSpecialite(), sousClasse.getHoraire());
-        if (classe == null) throw new BadRequestException("can not bind to any existing classe");
+                sousClasse.getSpecialite(), sousClasse.getHoraire());
+        if (classe == null)
+            throw new BadRequestException("can not bind to any existing classe");
 
         sousClasse.setArchive(false);
         sousClasse.setEtat(true);
@@ -155,7 +160,7 @@ public class ParametrageClasseController {
         classeSousClasse.setClasse(classe);
         classeSousClasse.setSousClasse(sousClasse);
         classeSousClasse.setArchive(false);
-        
+
         parametrageClasseService.addClasseSousClasse(classeSousClasse);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(sousClasse);
@@ -221,4 +226,42 @@ public class ParametrageClasseController {
         sousClasse.setArchive(true);
         return ResponseEntity.ok(parametrageClasseService.addSousClasse(sousClasse));
     }
+
+    // ----------------- CLASSE REFERENTIEL ENDPOINTS
+    @PostMapping("classe-referentiel")
+    public ResponseEntity<?> addClasseReferentiel(@RequestBody List<ClasseReferentiel> classeReferentiels) {
+        if (classeReferentiels == null)
+            throw new BadRequestException("body is required");
+        if (classeReferentiels.isEmpty())
+            throw new BadRequestException("body is required");
+
+        classeReferentiels.parallelStream().forEach(d -> {
+            if (parametrageClasseService.findClasseReferentielByClasseAndReferentiel(d.getClasse(),
+                    d.getReferentiel()) == null) {
+                parametrageClasseService.addClasseReferentiel(d);
+            }
+        });
+        return ResponseEntity.status(HttpStatus.CREATED).body(classeReferentiels);
+    }
+
+    @GetMapping("classe-referentiel/classe/{classeId}/referentiel/{referentielId}")
+    public ResponseEntity<?> getClasseReferentielByClasseAndReferentiel(@PathVariable Long classeId,
+            @PathVariable Long referentielId) {
+        if (classeId == null)
+            throw new BadRequestException("classeId required");
+        if (referentielId == null)
+            throw new BadRequestException("referentielId required");
+
+        Classe classe = parametrageClasseService.findClasseById(classeId);
+        if (classe == null)
+            throw new EntityNotFoundException("classe not found");
+
+        Referentiel referentiel = parametrageReferentielService.findReferentielById(referentielId);
+        if (referentiel == null)
+            throw new EntityNotFoundException("referentiel not found");
+
+        return ResponseEntity
+                .ok(parametrageClasseService.findClasseReferentielByClasseAndReferentiel(classe, referentiel));
+    }
+
 }

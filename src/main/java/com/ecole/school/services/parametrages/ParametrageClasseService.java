@@ -140,6 +140,10 @@ public class ParametrageClasseService {
         return classeReferentielRepository.findAllByAnneeScolaireAndArchiveFalse(anneeScolaire).orElse(new ArrayList<>());
     }
 
+    public ClasseReferentiel findClasseReferentielByClasseAndReferentiel(Classe classe, Referentiel referentiel) {
+        return classeReferentielRepository.findByClasseAndReferentielAndArchiveFalse(classe, referentiel).orElse(null);
+    }
+
     // ----------------- CLASSE SOUS CLASSE SERVICES
     public ClasseSousClasse addClasseSousClasse(ClasseSousClasse classeSousClasse) {
         try {
