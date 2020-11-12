@@ -196,9 +196,7 @@ public class ParametrageSpecialiteController {
             throw new BadRequestException("body is required");
 
         documentParNiveaus.parallelStream().forEach(d -> {
-            if (parametrageSpecialiteService.findDocumentParNiveauByNiveauAndDocument(d.getNiveau(), d.getDocument()) == null) {
-                parametrageSpecialiteService.addDocumentParNiveau(d);
-            }
+            parametrageSpecialiteService.addDocumentParNiveau(d);
         });
         return ResponseEntity.status(HttpStatus.CREATED).body(documentParNiveaus);
     }
