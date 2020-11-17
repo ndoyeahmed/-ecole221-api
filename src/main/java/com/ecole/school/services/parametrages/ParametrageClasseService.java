@@ -132,6 +132,10 @@ public class ParametrageClasseService {
         return classeReferentielRepository.findAllByClasseAndArchiveFalse(classe).orElse(new ArrayList<>());
     }
 
+    public List<ClasseReferentiel> findAllClasseReferentiel() {
+        return classeReferentielRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
+    }
+
     public List<ClasseReferentiel> findAllClasseReferentielByReferentiel(Referentiel referentiel) {
         return classeReferentielRepository.findAllByReferentielAndArchiveFalse(referentiel).orElse(new ArrayList<>());
     }

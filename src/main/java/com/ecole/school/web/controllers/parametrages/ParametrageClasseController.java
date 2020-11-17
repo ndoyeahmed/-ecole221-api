@@ -426,4 +426,26 @@ public class ParametrageClasseController {
                 .ok(parametrageClasseService.findFirstClasseReferentielByReferentiel(referentiel));
     }
 
+    @GetMapping("classe-referentiel/classe/{classeId}")
+    public ResponseEntity<?> getAllClasseReferentielByClasse(@PathVariable Long classeId) {
+        
+        if (classeId == null)
+            throw new BadRequestException("classeId required");
+
+        Classe classe = parametrageClasseService.findClasseById(classeId);
+        if (classe == null)
+            throw new EntityNotFoundException("classe not found");
+
+        return ResponseEntity
+                .ok(parametrageClasseService.findAllClasseReferentielByClasse(classe));
+    }
+
+
+    @GetMapping("classe-referentiel")
+    public ResponseEntity<?> getAllClasseReferentiel() {
+       
+        return ResponseEntity
+                .ok(parametrageClasseService.findAllClasseReferentiel());
+    }
+
 }

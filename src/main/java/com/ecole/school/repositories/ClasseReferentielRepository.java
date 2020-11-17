@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ClasseReferentielRepository extends JpaRepository<ClasseReferentiel, Long> {
+    Optional<List<ClasseReferentiel>> findAllByArchiveFalse();
+
     Optional<List<ClasseReferentiel>> findAllByClasseAndArchiveFalse(Classe classe);
 
     Optional<ClasseReferentiel> findByClasseAndReferentielAndArchiveFalse(Classe classe, Referentiel referentiel);
