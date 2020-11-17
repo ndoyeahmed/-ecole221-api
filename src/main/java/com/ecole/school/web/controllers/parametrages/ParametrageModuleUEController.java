@@ -8,8 +8,10 @@ import java.util.Map;
 import com.ecole.school.models.MentionModule;
 import com.ecole.school.models.MentionUE;
 import com.ecole.school.models.Module;
+import com.ecole.school.models.Specialite;
 import com.ecole.school.models.UE;
 import com.ecole.school.services.parametrages.ParametrageModuleUEService;
+import com.ecole.school.services.parametrages.ParametrageSpecialiteService;
 import com.ecole.school.services.utils.Utils;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
@@ -32,12 +34,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/parametrage-module-ue/")
 public class ParametrageModuleUEController {
     private ParametrageModuleUEService parametrageModuleUEService;
+    private ParametrageSpecialiteService parametrageSpecialiteService;
     private Utils utils;
 
     @Autowired
-    public ParametrageModuleUEController(ParametrageModuleUEService parametrageModuleUEService, Utils utils) {
+    public ParametrageModuleUEController(ParametrageModuleUEService parametrageModuleUEService, Utils utils, ParametrageSpecialiteService parametrageSpecialiteService) {
         this.parametrageModuleUEService = parametrageModuleUEService;
         this.utils = utils;
+        this.parametrageSpecialiteService = parametrageSpecialiteService;
     }
 
     // ----------------- MODULE ENDPOINTS
@@ -90,6 +94,24 @@ public class ParametrageModuleUEController {
         return ResponseEntity.ok(parametrageModuleUEService.addModule(module));
     }
 
+    @PutMapping("modules/{id}")
+    public ResponseEntity<?> updateModule(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (body == null)
+            throw new BadRequestException("body is required");
+        if (body.get("libelle") == null || body.get("libelle").trim().equals(""))
+            throw new BadRequestException("libelle is required");
+
+        Module module = parametrageModuleUEService.findModuleById(id);
+        if (module == null)
+            throw new EntityNotFoundException("entity not found");
+
+        module.setLibelle(body.get("libelle"));
+
+        return ResponseEntity.ok(parametrageModuleUEService.addModule(module));
+    }
+
     // ----------------- MENTION MODULE ENDPOINTS
     @PostMapping("mention-module")
     public ResponseEntity<?> addMentionModule(@RequestBody List<MentionModule> mentionModules) {
@@ -111,6 +133,29 @@ public class ParametrageModuleUEController {
             throw new EntityNotFoundException("entity not found");
 
         return ResponseEntity.ok(parametrageModuleUEService.findAllMentionModuleByModule(module));
+    }
+
+    @DeleteMapping("mention-module/{id}")
+    public ResponseEntity<?> archiveMentionModule(@PathVariable Long id) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        MentionModule mentionModule = parametrageModuleUEService.findMentionModuleById(id);
+        if (mentionModule == null)
+            throw new EntityNotFoundException("entity not found");
+
+        mentionModule.setArchive(true);
+        return ResponseEntity.ok(parametrageModuleUEService.addMentionModule(mentionModule));
+    }
+
+    @GetMapping("mention-module/mention/{specialiteId}")
+    public ResponseEntity<?> getAllMentionModuleByMention(@PathVariable Long specialiteId) {
+        if (specialiteId == null)
+            throw new BadRequestException("specialiteId required");
+        Specialite specialite = parametrageSpecialiteService.findSpecialiteById(specialiteId);
+        if (specialite == null)
+            throw new EntityNotFoundException("specialite not found");
+
+        return ResponseEntity.ok(parametrageModuleUEService.findAllMentionModuleByMention(specialite.getMention()));
     }
 
     // ----------------- UE ENDPOINTS
@@ -162,6 +207,24 @@ public class ParametrageModuleUEController {
         return ResponseEntity.ok(parametrageModuleUEService.addUE(ue));
     }
 
+    @PutMapping("ue/{id}")
+    public ResponseEntity<?> updateUE(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (body == null)
+            throw new BadRequestException("body is required");
+        if (body.get("libelle") == null || body.get("libelle").trim().equals(""))
+            throw new BadRequestException("libelle is required");
+
+        UE ue = parametrageModuleUEService.findUEById(id);
+        if (ue == null)
+            throw new EntityNotFoundException("entity not found");
+
+        ue.setLibelle(body.get("libelle"));
+
+        return ResponseEntity.ok(parametrageModuleUEService.addUE(ue));
+    }
+
     // ----------------- MENTION MODULE ENDPOINTS
     @PostMapping("mention-ue")
     public ResponseEntity<?> addMentionUE(@RequestBody List<MentionUE> mentionUEs) {
@@ -175,14 +238,37 @@ public class ParametrageModuleUEController {
     }
 
     @GetMapping("mention-ue/ue/{id}")
-    public ResponseEntity<?> getAllMentionUEByModule(@PathVariable Long id) {
+    public ResponseEntity<?> getAllMentionUEByUE(@PathVariable Long id) {
         if (id == null)
             throw new BadRequestException("id required");
         UE ue = parametrageModuleUEService.findUEById(id);
         if (ue == null)
             throw new EntityNotFoundException("entity not found");
 
-        return ResponseEntity.ok(parametrageModuleUEService.findAllMentionUEByModule(ue));
+        return ResponseEntity.ok(parametrageModuleUEService.findAllMentionUEByUE(ue));
+    }
+
+    @DeleteMapping("mention-ue/{id}")
+    public ResponseEntity<?> archiveMentionUE(@PathVariable Long id) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        MentionUE mentionUE = parametrageModuleUEService.findMentionUEById(id);
+        if (mentionUE == null)
+            throw new EntityNotFoundException("entity not found");
+
+        mentionUE.setArchive(true);
+        return ResponseEntity.ok(parametrageModuleUEService.addMentionUE(mentionUE));
+    }
+
+    @GetMapping("mention-ue/mention/{specialiteId}")
+    public ResponseEntity<?> getAllMentionUEByMention(@PathVariable Long specialiteId) {
+        if (specialiteId == null)
+            throw new BadRequestException("specialiteId required");
+        Specialite specialite = parametrageSpecialiteService.findSpecialiteById(specialiteId);
+        if (specialite == null)
+            throw new EntityNotFoundException("specialite not found");
+
+        return ResponseEntity.ok(parametrageModuleUEService.findAllMentionUEByMentions(specialite.getMention()));
     }
 
 }

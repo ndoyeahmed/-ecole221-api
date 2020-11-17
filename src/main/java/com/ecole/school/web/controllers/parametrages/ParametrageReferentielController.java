@@ -2,7 +2,9 @@ package com.ecole.school.web.controllers.parametrages;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import com.ecole.school.models.Module;
@@ -68,6 +70,103 @@ public class ParametrageReferentielController {
                 .body(parametrageReferentielService.addReferentiel(referentiel));
     }
 
+    private void cloneRef(Referentiel oldRef, Referentiel newRef) {
+        List<ProgrammeUE> programmeUEs = parametrageReferentielService.findAllProgrammeUEByReferentiel(oldRef);
+        if (!programmeUEs.isEmpty()) {
+            // clone programme ue and programme module
+            programmeUEs.parallelStream().forEach(x -> {
+                List<ProgrammeModule> programmeModules = parametrageReferentielService
+                        .findAllProgrammeModuleByProgrammeUE(x);
+                ProgrammeUE pu = new ProgrammeUE();
+                pu.setArchive(x.isArchive());
+                try {
+                    pu.setCode(utils.generateUniqueId());
+                } catch (UnsupportedEncodingException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (NoSuchAlgorithmException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                pu.setCredit(x.getCredit());
+                pu.setFondamental(x.getFondamental());
+                pu.setNbreHeureUE(x.getNbreHeureUE());
+                pu.setUe(x.getUe());
+                pu.setSemestre(x.getSemestre());
+                pu.setReferentiel(newRef);
+                parametrageReferentielService.addProgrammeUE(pu);
+                if (!programmeModules.isEmpty()) {
+                    for (ProgrammeModule pm : programmeModules) {
+                        ProgrammeModule prModule = new ProgrammeModule();
+                        try {
+                            prModule.setCode(utils.generateUniqueId());
+                        } catch (UnsupportedEncodingException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        } catch (NoSuchAlgorithmException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                        prModule.setBudget(pm.getBudget());
+                        prModule.setCoef(pm.getCoef());
+                        prModule.setNbreCreditModule(pm.getNbreCreditModule());
+                        prModule.setTd(pm.getTd());
+                        prModule.setTp(pm.getTp());
+                        prModule.setTpe(pm.getTpe());
+                        prModule.setVh(pm.getVh());
+                        prModule.setVht(pm.getVht());
+                        prModule.setModule(pm.getModule());
+                        prModule.setProgrammeUE(pu);
+                        parametrageReferentielService.addProgrammeModule(pm);
+                    }
+                }
+            });
+        }
+    }
+
+    @PostMapping("referentiel/{id}")
+    public ResponseEntity<?> cloneReferentiel(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (id == null)
+            throw new BadRequestException("old id required");
+
+        Referentiel oldRef = parametrageReferentielService.findReferentielById(id);
+        if (oldRef == null)
+            throw new EntityNotFoundException("old referentiel not found");
+
+        if (body == null)
+            throw new BadRequestException("body is required");
+        if (body.get("niveau") == null)
+            throw new BadRequestException("niveau required");
+        if (body.get("specialite") == null)
+            throw new BadRequestException("specialite required");
+        if (body.get("annee") == null)
+            throw new BadRequestException("annee required");
+        if (body.get("credit") == null)
+            throw new BadRequestException("credit required");
+
+        Niveau niveau = parametrageSpecialiteService.findNiveauById(Long.valueOf(body.get("niveau")));
+        if (niveau == null)
+            throw new EntityNotFoundException("niveau not found");
+        Specialite specialite = parametrageSpecialiteService.findSpecialiteById(Long.valueOf(body.get("specialite")));
+        if (specialite == null)
+            throw new EntityNotFoundException("specialite not found");
+
+        Referentiel referentiel = new Referentiel();
+        referentiel.setNiveau(niveau);
+        referentiel.setSpecialite(specialite);
+        referentiel.setAnnee(Integer.parseInt(body.get("annee")));
+        referentiel.setCredit(Integer.parseInt(body.get("credit")));
+        referentiel.setVolumeHeureTotal(Integer.parseInt(body.get("volumeHeureTotal")));
+        referentiel.setDescription(body.get("description"));
+        referentiel.setArchive(false);
+        referentiel.setDate(new Date());
+        referentiel = parametrageReferentielService.addReferentiel(referentiel);
+
+        cloneRef(oldRef, referentiel);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(referentiel);
+    }
+
     @GetMapping("referentiel")
     public ResponseEntity<?> getAllReferentiel() {
         return ResponseEntity.ok(parametrageReferentielService.findAllReferentiel());
@@ -126,6 +225,25 @@ public class ParametrageReferentielController {
         if (referentiel == null)
             throw new EntityNotFoundException("entity not found");
 
+        List<ProgrammeUE> programmeUEs = parametrageReferentielService.findAllProgrammeUEByReferentiel(referentiel);
+        if (!programmeUEs.isEmpty()) {
+            programmeUEs.parallelStream().forEach(x -> {
+                // archive programme ue
+                x.setArchive(true);
+                parametrageReferentielService.addProgrammeUE(x);
+
+                // archive programme module
+                List<ProgrammeModule> programmeModules = parametrageReferentielService
+                        .findAllProgrammeModuleByProgrammeUE(x);
+                if (!programmeModules.isEmpty()) {
+                    programmeModules.parallelStream().forEach(m -> {
+                        m.setArchive(true);
+                        parametrageReferentielService.addProgrammeModule(m);
+                    });
+                }
+            });
+        }
+
         referentiel.setArchive(true);
         return ResponseEntity.ok(parametrageReferentielService.addReferentiel(referentiel));
     }
@@ -150,7 +268,8 @@ public class ParametrageReferentielController {
 
         int annee = Integer.parseInt(body.get("annee"));
 
-        return ResponseEntity.ok(parametrageReferentielService.findReferentielByNiveauAndSpecialiteAndAnnee(niveau, specialite, annee));
+        return ResponseEntity.ok(
+                parametrageReferentielService.findReferentielByNiveauAndSpecialiteAndAnnee(niveau, specialite, annee));
     }
 
     // ----------------- PROGRAMME UE ENDPOINTS

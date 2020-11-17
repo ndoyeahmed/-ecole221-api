@@ -1,14 +1,17 @@
 package com.ecole.school.web.controllers.parametrages;
 
 import java.util.List;
+import java.util.Map;
 
 import com.ecole.school.models.Classe;
 import com.ecole.school.models.ClasseReferentiel;
 import com.ecole.school.models.ClasseSousClasse;
+import com.ecole.school.models.Horaire;
 import com.ecole.school.models.Niveau;
 import com.ecole.school.models.Referentiel;
 import com.ecole.school.models.SousClasse;
 import com.ecole.school.models.Specialite;
+import com.ecole.school.services.parametrages.ParametrageBaseService;
 import com.ecole.school.services.parametrages.ParametrageClasseService;
 import com.ecole.school.services.parametrages.ParametrageReferentielService;
 import com.ecole.school.services.parametrages.ParametrageSpecialiteService;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,16 +39,18 @@ public class ParametrageClasseController {
     private ParametrageClasseService parametrageClasseService;
     private ParametrageReferentielService parametrageReferentielService;
     private ParametrageSpecialiteService parametrageSpecialiteService;
+    private ParametrageBaseService parametrageBaseService;
     private Utils utils;
 
     @Autowired
     public ParametrageClasseController(ParametrageReferentielService parametrageReferentielService, Utils utils,
-            ParametrageSpecialiteService parametrageSpecialiteService,
+            ParametrageSpecialiteService parametrageSpecialiteService, ParametrageBaseService parametrageBaseService,
             ParametrageClasseService parametrageClasseService) {
         this.utils = utils;
         this.parametrageReferentielService = parametrageReferentielService;
         this.parametrageSpecialiteService = parametrageSpecialiteService;
         this.parametrageClasseService = parametrageClasseService;
+        this.parametrageBaseService = parametrageBaseService;
     }
 
     // ----------------- CLASSE ENDPOINTS
@@ -127,8 +133,71 @@ public class ParametrageClasseController {
         Classe classe = parametrageClasseService.findClasseById(id);
         if (classe == null)
             throw new EntityNotFoundException("entity not found");
+        List<ClasseSousClasse> classeSousClasses = parametrageClasseService.findAllClasseSousClasseByClasse(classe);
+        if (!classeSousClasses.isEmpty()) {
+            classeSousClasses.parallelStream().forEach(x -> {
+                x.setArchive(true);
+                SousClasse sousClasse = x.getSousClasse();
+                sousClasse.setArchive(true);
+                parametrageClasseService.addSousClasse(sousClasse);
+                parametrageClasseService.addClasseSousClasse(x);
+            });
+        }
 
         classe.setArchive(true);
+        return ResponseEntity.ok(parametrageClasseService.addClasse(classe));
+    }
+
+    @PutMapping("classe/etat/{id}")
+    public ResponseEntity<?> updateClasseStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (body == null)
+            throw new BadRequestException("body is required");
+
+        Classe classe = parametrageClasseService.findClasseById(id);
+        if (classe == null)
+            throw new EntityNotFoundException("entity not found");
+
+        boolean status = Boolean.parseBoolean(body.get("status"));
+        classe.setEtat(status);
+
+        return ResponseEntity.ok(parametrageClasseService.addClasse(classe));
+    }
+
+    @PutMapping("classe/{id}")
+    public ResponseEntity<?> updateClasse(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (body == null)
+            throw new BadRequestException("body is required");
+        if (body.get("libelle") == null || body.get("libelle").trim().equals(""))
+            throw new BadRequestException("libelle is required");
+        if (body.get("niveauId") == null)
+            throw new BadRequestException("niveauId is required");
+        if (body.get("specialiteId") == null)
+            throw new BadRequestException("specialiteId is required");
+        if (body.get("horaireId") == null)
+            throw new BadRequestException("horaireId is required");
+
+        Classe classe = parametrageClasseService.findClasseById(id);
+        if (classe == null)
+            throw new EntityNotFoundException("classe not found");
+        Niveau niveau = parametrageSpecialiteService.findNiveauById(Long.valueOf(body.get("niveauId")));
+        if (niveau == null)
+            throw new EntityNotFoundException("niveau not found");
+        Specialite specialite = parametrageSpecialiteService.findSpecialiteById(Long.valueOf(body.get("specialiteId")));
+        if (specialite == null)
+            throw new EntityNotFoundException("specialite not found");
+        Horaire horaire = parametrageBaseService.findHoraireById(Long.valueOf(body.get("horaireId")));
+        if (horaire == null)
+            throw new EntityNotFoundException("horaire not found");
+
+        classe.setLibelle(body.get("libelle"));
+        classe.setNiveau(niveau);
+        classe.setSpecialite(specialite);
+        classe.setHoraire(horaire);
+
         return ResponseEntity.ok(parametrageClasseService.addClasse(classe));
     }
 
@@ -223,7 +292,86 @@ public class ParametrageClasseController {
         if (sousClasse == null)
             throw new EntityNotFoundException("entity not found");
 
+        Classe classe = parametrageClasseService.findClasseByNiveauAndSpecialiteAndHoraire(sousClasse.getNiveau(),
+                sousClasse.getSpecialite(), sousClasse.getHoraire());
+        if (classe == null)
+            throw new EntityNotFoundException("classe origin not found");
+        ClasseSousClasse classeSousClasse = parametrageClasseService.findClasseSousClasseByClasseAndSousClasse(classe,
+                sousClasse);
+        if (classeSousClasse == null)
+            throw new EntityNotFoundException("classeSousclasse not found");
+
+        classeSousClasse.setArchive(true);
+        parametrageClasseService.addClasseSousClasse(classeSousClasse);
         sousClasse.setArchive(true);
+        return ResponseEntity.ok(parametrageClasseService.addSousClasse(sousClasse));
+    }
+
+    @PutMapping("sous-classe/etat/{id}")
+    public ResponseEntity<?> updateSousClasseStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (body == null)
+            throw new BadRequestException("body is required");
+
+        SousClasse sousClasse = parametrageClasseService.findSousClasseById(id);
+        if (sousClasse == null)
+            throw new EntityNotFoundException("entity not found");
+
+        boolean status = Boolean.parseBoolean(body.get("status"));
+        sousClasse.setEtat(status);
+
+        return ResponseEntity.ok(parametrageClasseService.addSousClasse(sousClasse));
+    }
+
+    @PutMapping("sous-classe/{id}")
+    public ResponseEntity<?> updateSousClasse(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (id == null)
+            throw new BadRequestException("id required");
+        if (body == null)
+            throw new BadRequestException("body is required");
+        if (body.get("libelle") == null || body.get("libelle").trim().equals(""))
+            throw new BadRequestException("libelle is required");
+        if (body.get("niveauId") == null)
+            throw new BadRequestException("niveauId is required");
+        if (body.get("specialiteId") == null)
+            throw new BadRequestException("specialiteId is required");
+        if (body.get("horaireId") == null)
+            throw new BadRequestException("horaireId is required");
+
+        SousClasse sousClasse = parametrageClasseService.findSousClasseById(id);
+        if (sousClasse == null)
+            throw new EntityNotFoundException("sous classe not found");
+        Niveau niveau = parametrageSpecialiteService.findNiveauById(Long.valueOf(body.get("niveauId")));
+        if (niveau == null)
+            throw new EntityNotFoundException("niveau not found");
+        Specialite specialite = parametrageSpecialiteService.findSpecialiteById(Long.valueOf(body.get("specialiteId")));
+        if (specialite == null)
+            throw new EntityNotFoundException("specialite not found");
+        Horaire horaire = parametrageBaseService.findHoraireById(Long.valueOf(body.get("horaireId")));
+        if (horaire == null)
+            throw new EntityNotFoundException("horaire not found");
+        Classe classe = parametrageClasseService.findClasseByNiveauAndSpecialiteAndHoraire(sousClasse.getNiveau(),
+                sousClasse.getSpecialite(), sousClasse.getHoraire());
+        if (classe == null)
+            throw new EntityNotFoundException("classe origin not found");
+        Classe classeNew = parametrageClasseService.findClasseByNiveauAndSpecialiteAndHoraire(niveau, specialite,
+                horaire);
+        if (classeNew == null)
+            throw new EntityNotFoundException("classe to move sousclasse not found");
+        ClasseSousClasse classeSousClasse = parametrageClasseService.findClasseSousClasseByClasseAndSousClasse(classe,
+                sousClasse);
+        if (classeSousClasse == null)
+            throw new EntityNotFoundException("classeSousclasse not found");
+
+        classeSousClasse.setClasse(classeNew);
+        parametrageClasseService.addClasseSousClasse(classeSousClasse);
+
+        sousClasse.setLibelle(body.get("libelle"));
+        sousClasse.setNiveau(niveau);
+        sousClasse.setSpecialite(specialite);
+        sousClasse.setHoraire(horaire);
+
         return ResponseEntity.ok(parametrageClasseService.addSousClasse(sousClasse));
     }
 
@@ -262,6 +410,20 @@ public class ParametrageClasseController {
 
         return ResponseEntity
                 .ok(parametrageClasseService.findClasseReferentielByClasseAndReferentiel(classe, referentiel));
+    }
+
+    @GetMapping("classe-referentiel/referentiel/{referentielId}")
+    public ResponseEntity<?> getFirstClasseReferentielByReferentiel(@PathVariable Long referentielId) {
+        
+        if (referentielId == null)
+            throw new BadRequestException("referentielId required");
+
+        Referentiel referentiel = parametrageReferentielService.findReferentielById(referentielId);
+        if (referentiel == null)
+            throw new EntityNotFoundException("referentiel not found");
+
+        return ResponseEntity
+                .ok(parametrageClasseService.findFirstClasseReferentielByReferentiel(referentiel));
     }
 
 }

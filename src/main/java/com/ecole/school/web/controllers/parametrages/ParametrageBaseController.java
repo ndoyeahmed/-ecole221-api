@@ -57,6 +57,11 @@ public class ParametrageBaseController {
         return ResponseEntity.ok(parametrageBaseService.findAllAnneeScolaire());
     }
 
+    @GetMapping("annee-scolaire/encours")
+    public ResponseEntity<?> getAnneeScolaireEncour() {
+        return ResponseEntity.ok(parametrageBaseService.findAnneeScolaireEnCours());
+    }
+
     @DeleteMapping("annee-scolaire/{id}")
     public ResponseEntity<?> archiveAnneeScolaire(@PathVariable Long id) {
         if (id == null)

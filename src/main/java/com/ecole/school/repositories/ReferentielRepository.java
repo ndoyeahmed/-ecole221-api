@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
 public interface ReferentielRepository extends JpaRepository<Referentiel, Long> {
     Optional<List<Referentiel>> findAllByArchiveFalse();
 
+    Optional<List<Referentiel>> findAllByArchiveFalseOrderByAnneeDesc();
+
     Optional<List<Referentiel>> findAllByNiveauAndArchiveFalse(Niveau niveau);
 
     Optional<List<Referentiel>> findAllBySpecialiteAndArchiveFalse(Specialite specialite);

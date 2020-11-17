@@ -52,7 +52,7 @@ public class ParametrageReferentielService {
     }
 
     public List<Referentiel> findAllReferentiel() {
-        return referentielRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
+        return referentielRepository.findAllByArchiveFalseOrderByAnneeDesc().orElse(new ArrayList<>());
     }
 
     public List<Referentiel> findAllReferentielByNiveau(Niveau niveau) {
@@ -75,6 +75,16 @@ public class ParametrageReferentielService {
     public ProgrammeUE addProgrammeUE(ProgrammeUE programmeUE) {
         try {
             programmeUERepository.save(programmeUE);
+            return programmeUE;
+        } catch (Exception e) {
+            log.severe(e.getLocalizedMessage());
+            throw e;
+        }
+    }
+
+    public List<ProgrammeUE> addListProgrammeUE(List<ProgrammeUE> programmeUE) {
+        try {
+            programmeUERepository.saveAll(programmeUE);
             return programmeUE;
         } catch (Exception e) {
             log.severe(e.getLocalizedMessage());
@@ -107,6 +117,16 @@ public class ParametrageReferentielService {
         try {
             programmeModuleRepository.save(programmeModule);
             return programmeModule;
+        } catch(Exception e) {
+            log.severe(e.getLocalizedMessage());
+            throw e;
+        }
+    }
+
+    public List<ProgrammeModule> addListProgrammeModule(List<ProgrammeModule> programmeModules) {
+        try {
+            programmeModuleRepository.saveAll(programmeModules);
+            return programmeModules;
         } catch(Exception e) {
             log.severe(e.getLocalizedMessage());
             throw e;

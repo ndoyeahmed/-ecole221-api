@@ -3,6 +3,7 @@ package com.ecole.school.services.parametrages;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ecole.school.models.Mention;
 import com.ecole.school.models.MentionModule;
 import com.ecole.school.models.MentionUE;
 import com.ecole.school.models.Module;
@@ -75,6 +76,10 @@ public class ParametrageModuleUEService {
         return mentionModuleRepository.findAllByModuleAndArchiveFalse(module).orElse(new ArrayList<>());
     }
 
+    public List<MentionModule> findAllMentionModuleByMention(Mention mention) {
+        return mentionModuleRepository.findAllByMentionAndArchiveFalse(mention).orElse(new ArrayList<>());
+    }
+
     // ----------------- UE SERVICES
     public UE addUE(UE ue) {
         try {
@@ -109,7 +114,11 @@ public class ParametrageModuleUEService {
         return mentionUeRepository.findById(id).orElse(null);
     }
 
-    public List<MentionUE> findAllMentionUEByModule(UE ue) {
+    public List<MentionUE> findAllMentionUEByUE(UE ue) {
         return mentionUeRepository.findAllByUeAndArchiveFalse(ue).orElse(new ArrayList<>());
+    }
+
+    public List<MentionUE> findAllMentionUEByMentions(Mention mention) {
+        return mentionUeRepository.findAllByMentionAndArchiveFalse(mention).orElse(new ArrayList<>());
     }
 }

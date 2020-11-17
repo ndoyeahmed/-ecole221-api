@@ -15,4 +15,6 @@ public interface ClasseSousClasseRepository extends JpaRepository<ClasseSousClas
     Optional<List<ClasseSousClasse>> findAllByClasseAndArchiveFalse(Classe classe);
 
     Optional<List<ClasseSousClasse>> findAllBySousClasseAndArchiveFalse(SousClasse sousClasse);
+
+    Optional<ClasseSousClasse> findByClasseAndSousClasseAndArchiveFalse(Classe classe, SousClasse sousClasse);
 }

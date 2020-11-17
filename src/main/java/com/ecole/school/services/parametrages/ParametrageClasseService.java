@@ -136,6 +136,10 @@ public class ParametrageClasseService {
         return classeReferentielRepository.findAllByReferentielAndArchiveFalse(referentiel).orElse(new ArrayList<>());
     }
 
+    public ClasseReferentiel findFirstClasseReferentielByReferentiel(Referentiel referentiel) {
+        return classeReferentielRepository.findFirstByReferentielAndArchiveFalse(referentiel).orElse(null);
+    }
+
     public List<ClasseReferentiel> findAllClasseReferentielByAnneeScolaire(AnneeScolaire anneeScolaire) {
         return classeReferentielRepository.findAllByAnneeScolaireAndArchiveFalse(anneeScolaire).orElse(new ArrayList<>());
     }
@@ -157,6 +161,10 @@ public class ParametrageClasseService {
 
     public ClasseSousClasse findClasseSousClasseById(Long id) {
         return classeSousClasseRepository.findById(id).orElse(null);
+    }
+
+    public ClasseSousClasse findClasseSousClasseByClasseAndSousClasse(Classe classe, SousClasse sousClasse) {
+        return classeSousClasseRepository.findByClasseAndSousClasseAndArchiveFalse(classe, sousClasse).orElse(null);
     }
 
     public List<ClasseSousClasse> findAllClasseSousClasseByClasse(Classe classe) {

@@ -140,6 +140,22 @@ public class ParametrageSpecialiteController {
         if (niveau == null)
             throw new EntityNotFoundException("entity not found");
 
+        List<DocumentParNiveau> documentParNiveau = parametrageSpecialiteService.findAllDocumentParNiveauByNiveau(niveau);
+        if (!documentParNiveau.isEmpty()) {
+            documentParNiveau.parallelStream().forEach(x -> {
+                x.setArchive(true);
+                parametrageSpecialiteService.addDocumentParNiveau(x);
+            });
+        }
+
+        List<SemestreNiveau> semestreParNiveaus = parametrageSpecialiteService.findAllSemestreNiveauByNiveau(niveau);
+        if (!semestreParNiveaus.isEmpty()) {
+            semestreParNiveaus.parallelStream().forEach(x -> {
+                x.setArchive(true);
+                parametrageSpecialiteService.addSemestreNiveau(x);
+            });
+        }
+        
         niveau.setArchive(true);
         return ResponseEntity.ok(parametrageSpecialiteService.addNiveau(niveau));
     }
@@ -329,6 +345,13 @@ public class ParametrageSpecialiteController {
         if (specialite == null)
             throw new EntityNotFoundException("entity not found");
 
+        List<NiveauSpecialite> niveauSpecialites = parametrageSpecialiteService.findAllNiveauSpecialiteBySpecialite(specialite);
+        if (!niveauSpecialites.isEmpty()) {
+            niveauSpecialites.parallelStream().forEach(x -> {
+                x.setArchive(true);
+                parametrageSpecialiteService.addNiveauSpecialite(x);
+            });
+        }
         specialite.setArchive(true);
         return ResponseEntity.ok(parametrageSpecialiteService.addSpecialite(specialite));
     }
