@@ -478,4 +478,10 @@ public class ParametrageBaseController {
 
         return ResponseEntity.ok(parametrageBaseService.addMention(mention));
     }
+
+    // ----------------- PAYS ENDPOINTS
+    @GetMapping("pays")
+    public ResponseEntity<?> getAllPays() {
+        return ResponseEntity.ok(parametrageBaseService.findAllPays());
+    }
 }

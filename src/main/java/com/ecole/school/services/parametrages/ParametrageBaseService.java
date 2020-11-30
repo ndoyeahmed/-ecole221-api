@@ -10,6 +10,7 @@ import com.ecole.school.models.Domaine;
 import com.ecole.school.models.Horaire;
 import com.ecole.school.models.Mention;
 import com.ecole.school.models.Parcours;
+import com.ecole.school.models.Pays;
 import com.ecole.school.repositories.AnneeScolaireRepository;
 import com.ecole.school.repositories.CycleRepository;
 import com.ecole.school.repositories.DocumentRepository;
@@ -17,6 +18,7 @@ import com.ecole.school.repositories.DomaineRepository;
 import com.ecole.school.repositories.HoraireRepository;
 import com.ecole.school.repositories.MentionRepository;
 import com.ecole.school.repositories.ParcoursRepository;
+import com.ecole.school.repositories.PaysRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,12 +37,13 @@ public class ParametrageBaseService {
     private HoraireRepository horaireRepository;
     private DocumentRepository documentRepository;
     private MentionRepository mentionRepository;
+    private PaysRepository paysRepository;
 
     @Autowired
     public ParametrageBaseService(AnneeScolaireRepository anneeScolaireRepository, CycleRepository cycleRepository,
                                 DomaineRepository domaineRepository, ParcoursRepository parcoursRepository,
                                 HoraireRepository horaireRepository, DocumentRepository documentRepository,
-                                MentionRepository mentionRepository) {
+                                MentionRepository mentionRepository, PaysRepository paysRepository) {
         this.anneeScolaireRepository = anneeScolaireRepository;
         this.domaineRepository = domaineRepository;
         this.cycleRepository = cycleRepository;
@@ -48,6 +51,7 @@ public class ParametrageBaseService {
         this.horaireRepository = horaireRepository;
         this.documentRepository = documentRepository;
         this.mentionRepository = mentionRepository;
+        this.paysRepository = paysRepository;
     }
 
     // ----------------- ANNEE SCOLAIRE SERVICES
@@ -213,5 +217,11 @@ public class ParametrageBaseService {
 
     public List<Mention> findAllMention() {
         return mentionRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
+    }
+
+
+    // ----------------- PAYS SERVICES
+    public List<Pays> findAllPays() {
+        return paysRepository.findAll();
     }
 }

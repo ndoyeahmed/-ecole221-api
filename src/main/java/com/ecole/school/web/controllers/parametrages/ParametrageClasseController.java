@@ -3,6 +3,7 @@ package com.ecole.school.web.controllers.parametrages;
 import java.util.List;
 import java.util.Map;
 
+import com.ecole.school.models.AnneeScolaire;
 import com.ecole.school.models.Classe;
 import com.ecole.school.models.ClasseReferentiel;
 import com.ecole.school.models.ClasseSousClasse;
@@ -375,6 +376,37 @@ public class ParametrageClasseController {
         return ResponseEntity.ok(parametrageClasseService.addSousClasse(sousClasse));
     }
 
+    @PutMapping("sous-classe/a-inscrire")
+    public ResponseEntity<?> getSousClasseAInscrire(@RequestBody Map<String, String> body) {
+        
+        if (body == null)
+            throw new BadRequestException("body is required");
+        if (body.get("niveauId") == null)
+            throw new BadRequestException("niveauId is required");
+        if (body.get("specialiteId") == null)
+            throw new BadRequestException("specialiteId is required");
+        if (body.get("horaireId") == null)
+            throw new BadRequestException("horaireId is required");
+
+        
+        Niveau niveau = parametrageSpecialiteService.findNiveauById(Long.valueOf(body.get("niveauId")));
+        if (niveau == null)
+            throw new EntityNotFoundException("niveau not found");
+        Specialite specialite = parametrageSpecialiteService.findSpecialiteById(Long.valueOf(body.get("specialiteId")));
+        if (specialite == null)
+            throw new EntityNotFoundException("specialite not found");
+        Horaire horaire = parametrageBaseService.findHoraireById(Long.valueOf(body.get("horaireId")));
+        if (horaire == null)
+            throw new EntityNotFoundException("horaire not found");
+
+        AnneeScolaire anneeScolaire = parametrageBaseService.findAnneeScolaireEnCours();
+        SousClasse sousClasse = parametrageClasseService.findSousClasseAInscrire(niveau, specialite, horaire, anneeScolaire);
+        if (sousClasse == null)
+            throw new BadRequestException("sousclasse full");
+
+        return ResponseEntity.ok(parametrageClasseService.addSousClasse(sousClasse));
+    }
+
     // ----------------- CLASSE REFERENTIEL ENDPOINTS
     @PostMapping("classe-referentiel")
     public ResponseEntity<?> addClasseReferentiel(@RequestBody List<ClasseReferentiel> classeReferentiels) {
@@ -448,4 +480,26 @@ public class ParametrageClasseController {
                 .ok(parametrageClasseService.findAllClasseReferentiel());
     }
 
+    // ----------------- CLASSE SOUS CLASSE ENDPOINTS
+    @PutMapping("classe-sous-classe/classe")
+    public ResponseEntity<?> getAllClasseSousClasseByClasse(@RequestBody Map<String, String> body) {
+        if (body == null) throw new BadRequestException("body required");
+        if (body.get("niveau") == null) throw new BadRequestException("niveau required");
+        if (body.get("specialite") == null) throw new BadRequestException("specialite required");
+        if (body.get("horaire") == null) throw new BadRequestException("horaire required");
+
+        Niveau niveau = parametrageSpecialiteService.findNiveauById(Long.valueOf(body.get("niveau")));
+        if (niveau == null) throw new EntityNotFoundException("niveau not found");
+
+        Specialite specialite = parametrageSpecialiteService.findSpecialiteById(Long.valueOf(body.get("specialite")));
+        if (specialite == null) throw new EntityNotFoundException("specialite not found");
+
+        Horaire horaire = parametrageBaseService.findHoraireById(Long.valueOf(body.get("horaire")));
+        if (horaire == null) throw new EntityNotFoundException("horaire not found");
+
+        Classe classe = parametrageClasseService.findClasseByNiveauAndSpecialiteAndHoraire(niveau, specialite, horaire);
+        if (classe == null) throw new EntityNotFoundException("classe not found");
+
+        return ResponseEntity.ok(parametrageClasseService.findAllClasseSousClasseByClasse(classe));
+    }
 }

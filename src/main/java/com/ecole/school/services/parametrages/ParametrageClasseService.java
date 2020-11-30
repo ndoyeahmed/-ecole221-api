@@ -97,6 +97,12 @@ public class ParametrageClasseService {
         return sousClasseRepository.findById(id).orElse(null);
     }
 
+    public SousClasse findSousClasseAInscrire(Niveau niveau, Specialite specialite, Horaire horaire, AnneeScolaire anneeScolaire) {
+        List<SousClasse> sousClasses = sousClasseRepository.findByAnneeScolaireAndNiveauAndSpecialiteAndHoraireAndArchiveFalseAndNombreInscritNotFull(niveau, specialite, horaire, anneeScolaire).orElse(new ArrayList<>());
+        if (sousClasses.isEmpty()) return null;
+        else return sousClasses.get(0);
+    }
+
     public List<SousClasse> findAllSousClasse() {
         return sousClasseRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
     }

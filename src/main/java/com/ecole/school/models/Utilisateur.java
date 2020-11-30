@@ -14,23 +14,26 @@ import lombok.ToString;
 @Data
 @Entity
 @ToString
-public class SousClasse {
+public class Utilisateur {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String libelle;
-    private int nbrEleve;
+    private String cin;
+    private String nom;
+    private String prenom;
+    private String adresse;
+    private String telephone;
+    private String email;
+    private String profession;
+    private String login;
+    private String password;
+    private String fonction;
+    @Column(columnDefinition = "boolean default false")
     private boolean etat;
     @Column(columnDefinition = "boolean default false")
     private boolean archive;
 
     @ManyToOne
-    @JoinColumn(name = "horaire", referencedColumnName = "id")
-    private Horaire horaire;
-    @ManyToOne
-    @JoinColumn(name = "niveau", referencedColumnName = "id")
-    private Niveau niveau;
-    @ManyToOne
-    @JoinColumn(name = "specialite", referencedColumnName = "id")
-    private Specialite specialite;
+    @JoinColumn(name="profil", referencedColumnName = "id")
+    private Profil profil;
 }
