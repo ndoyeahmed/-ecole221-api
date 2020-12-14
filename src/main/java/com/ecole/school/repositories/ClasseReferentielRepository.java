@@ -19,6 +19,10 @@ public interface ClasseReferentielRepository extends JpaRepository<ClasseReferen
 
     Optional<ClasseReferentiel> findByClasseAndReferentielAndArchiveFalse(Classe classe, Referentiel referentiel);
 
+    Optional<ClasseReferentiel> findByClasseAndReferentielAndAnneeScolaireAndArchiveFalse(Classe classe, Referentiel referentiel, AnneeScolaire anneeScolaire);
+
+    Optional<ClasseReferentiel> findByClasseAndAnneeScolaireAndArchiveFalse(Classe classe, AnneeScolaire anneeScolaire);
+
     Optional<List<ClasseReferentiel>> findAllByReferentielAndArchiveFalse(Referentiel referentiel);
 
     Optional<ClasseReferentiel> findFirstByReferentielAndArchiveFalse(Referentiel referentiel);

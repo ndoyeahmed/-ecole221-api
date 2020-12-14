@@ -5,10 +5,17 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Utils {
+
+  @Autowired
+  private BCryptPasswordEncoder encoder;
+
   public String generateUniqueId() throws UnsupportedEncodingException, NoSuchAlgorithmException {
     MessageDigest salt = MessageDigest.getInstance("SHA-256");
     salt.update(UUID.randomUUID().toString().getBytes("UTF-8"));
@@ -28,4 +35,14 @@ public class Utils {
 
     return libelle.trim().substring(0, 3);
   }
+
+  public String encodePassword(String password) {
+    return encoder.encode(password);
+  }
+
+  // Generate a radom String
+  public String generatePassword() {
+    String generatedString = RandomStringUtils.random(10, true, true);
+    return generatedString;
+}
 }

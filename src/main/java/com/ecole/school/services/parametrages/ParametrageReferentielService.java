@@ -141,8 +141,8 @@ public class ParametrageReferentielService {
         return programmeModuleRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
     }
 
-    public List<ProgrammeModule> findAllProgrammeModuleByProgrammeUE(ProgrammeUE programmeUE) {
-        return programmeModuleRepository.findAllByProgrammeUEAndArchiveFalse(programmeUE).orElse(new ArrayList<>());
+    public List<ProgrammeModule> findAllProgrammeModuleByProgrammeUE(Long programmeUEId) {
+        return programmeModuleRepository.findAllByProgrammeUEAndArchiveFalse(programmeUEId).orElse(new ArrayList<>());
     }
 
     public List<ProgrammeModule> findAllProgrammeModuleByModule(Module module) {

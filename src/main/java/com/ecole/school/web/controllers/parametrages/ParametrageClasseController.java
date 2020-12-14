@@ -404,7 +404,7 @@ public class ParametrageClasseController {
         if (sousClasse == null)
             throw new BadRequestException("sousclasse full");
 
-        return ResponseEntity.ok(parametrageClasseService.addSousClasse(sousClasse));
+        return ResponseEntity.ok(sousClasse);
     }
 
     // ----------------- CLASSE REFERENTIEL ENDPOINTS

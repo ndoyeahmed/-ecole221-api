@@ -7,6 +7,8 @@ import com.ecole.school.models.AnneeScolaire;
 import com.ecole.school.models.Inscription;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository

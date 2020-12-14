@@ -31,16 +31,18 @@ public class ParametrageClasseService {
     private ClasseSousClasseRepository classeSousClasseRepository;
     private ClasseReferentielRepository classeReferentielRepository;
     private SousClasseRepository sousClasseRepository;
+    private ParametrageBaseService parametrageBaseService;
 
     @Autowired
     public ParametrageClasseService(ClasseRepository classeRepository,
-            ClasseSousClasseRepository classeSousClasseRepository,
+            ClasseSousClasseRepository classeSousClasseRepository, ParametrageBaseService parametrageBaseService,
             ClasseReferentielRepository classeReferentielRepository, SousClasseRepository sousClasseRepository) {
         
         this.classeRepository = classeRepository;
         this.classeSousClasseRepository = classeSousClasseRepository;
         this.classeReferentielRepository = classeReferentielRepository;
         this.sousClasseRepository = sousClasseRepository;
+        this.parametrageBaseService = parametrageBaseService;
     }
 
     // ----------------- CLASSE SERVICES
@@ -156,6 +158,21 @@ public class ParametrageClasseService {
 
     public ClasseReferentiel findClasseReferentielByClasseAndReferentiel(Classe classe, Referentiel referentiel) {
         return classeReferentielRepository.findByClasseAndReferentielAndArchiveFalse(classe, referentiel).orElse(null);
+    }
+
+    public ClasseReferentiel hasClasseAffected(Niveau niveau, Specialite specialite, Horaire horaire) {
+        Classe classe = classeRepository.findByNiveauAndSpecialiteAndHoraireAndArchiveFalse(niveau, specialite, horaire)
+        .orElse(null);
+
+        if (classe != null) {
+            AnneeScolaire anneeScolaire = parametrageBaseService.findAnneeScolaireEnCours();
+            ClasseReferentiel classeReferentiel = classeReferentielRepository.findByClasseAndAnneeScolaireAndArchiveFalse(classe, anneeScolaire).orElse(null);
+            if (classeReferentiel != null && classeReferentiel.getAnneeDebut() <= anneeScolaire.getAnnee() && classeReferentiel.getAnneeFin() > anneeScolaire.getAnnee()) {
+                return classeReferentiel;
+            }
+        }
+
+        return null;
     }
 
     // ----------------- CLASSE SOUS CLASSE SERVICES

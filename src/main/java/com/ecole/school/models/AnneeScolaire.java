@@ -15,6 +15,7 @@ public class AnneeScolaire {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String libelle;
+    private int annee;
     private boolean enCours;
     @Column(columnDefinition = "boolean default false")
     private boolean archive;

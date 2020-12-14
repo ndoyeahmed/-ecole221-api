@@ -76,7 +76,7 @@ public class ParametrageReferentielController {
             // clone programme ue and programme module
             programmeUEs.parallelStream().forEach(x -> {
                 List<ProgrammeModule> programmeModules = parametrageReferentielService
-                        .findAllProgrammeModuleByProgrammeUE(x);
+                        .findAllProgrammeModuleByProgrammeUE(x.getId());
                 ProgrammeUE pu = new ProgrammeUE();
                 pu.setArchive(x.isArchive());
                 try {
@@ -234,7 +234,7 @@ public class ParametrageReferentielController {
 
                 // archive programme module
                 List<ProgrammeModule> programmeModules = parametrageReferentielService
-                        .findAllProgrammeModuleByProgrammeUE(x);
+                        .findAllProgrammeModuleByProgrammeUE(x.getId());
                 if (!programmeModules.isEmpty()) {
                     programmeModules.parallelStream().forEach(m -> {
                         m.setArchive(true);
@@ -398,7 +398,7 @@ public class ParametrageReferentielController {
         if (programmeUE == null)
             throw new EntityNotFoundException("entity not found");
 
-        return ResponseEntity.ok(parametrageReferentielService.findAllProgrammeModuleByProgrammeUE(programmeUE));
+        return ResponseEntity.ok(parametrageReferentielService.findAllProgrammeModuleByProgrammeUE(programmeUE.getId()));
     }
 
     @GetMapping("programme-module/module/programme-ue/{moduleId}/{programmeUEId}")

@@ -8,13 +8,16 @@ import com.ecole.school.models.ProgrammeModule;
 import com.ecole.school.models.ProgrammeUE;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProgrammeModuleRepository extends JpaRepository<ProgrammeModule, Long> {
     Optional<List<ProgrammeModule>> findAllByArchiveFalse();
 
-    Optional<List<ProgrammeModule>> findAllByProgrammeUEAndArchiveFalse(ProgrammeUE programmeUE);
+    @Query("select pm from ProgrammeModule pm where pm.archive=false and pm.programmeUE.id=:programmeUEId")
+    Optional<List<ProgrammeModule>> findAllByProgrammeUEAndArchiveFalse(@Param("programmeUEId") Long programmeUEId);
 
     Optional<List<ProgrammeModule>> findAllByModuleAndArchiveFalse(Module module);
 

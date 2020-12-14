@@ -53,6 +53,10 @@ public class InscriptionService {
         return etudiantRepository.findById(id).orElse(null);
     }
 
+    public Etudiant findEtudiantByCin(String cin) {
+        return etudiantRepository.findByCin(cin).orElse(null);
+    }
+
     //----------- Inscription service
     public Inscription addInscription(Inscription inscription) {
         try {
