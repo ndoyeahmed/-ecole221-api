@@ -14,4 +14,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface InscriptionRepository extends JpaRepository<Inscription, Long> {
     Optional<List<Inscription>> findAllByAnneeScolaireAndArchiveFalse(AnneeScolaire anneeScolaire);
+
+    @Query("select i from Inscription i where i.archive=false and i.etudiant.id=:idEtudiant")
+    Optional<List<Inscription>> findAllByEtudiantAndArchiveFalse(@Param("idEtudiant") Long idEtudiant);
 }

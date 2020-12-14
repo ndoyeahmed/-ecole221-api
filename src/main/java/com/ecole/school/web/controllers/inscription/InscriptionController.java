@@ -174,6 +174,24 @@ public class InscriptionController {
         return ResponseEntity.ok(inscriptionService.findAllInscriptionByAnneeScolaire(anneeScolaire));
     }
 
+    @GetMapping("inscription/{id}")
+    public ResponseEntity<?> getInscriptionById(@PathVariable Long id) {
+        if (id == null) throw new BadRequestException("id required");
+        Inscription inscription = inscriptionService.findInscriptionById(id);
+        if (inscription == null) throw new BadRequestException("inscription not found");
+
+        return ResponseEntity.ok(inscription);
+    }
+
+    @GetMapping("etudiant/inscriptions/{idInscription}")
+    public ResponseEntity<?> getAllEtudiantInscription(@PathVariable Long idInscription) {
+        if (idInscription == null) throw new BadRequestException("idInscription required");
+        Inscription inscription = inscriptionService.findInscriptionById(idInscription);
+        if (inscription == null) throw new BadRequestException("inscription not found");
+
+        return ResponseEntity.ok(inscriptionService.findAllInscriptionByEtudiantId(inscription.getEtudiant().getId()));
+    }
+
     @PutMapping("etudiant/change/classe")
     public ResponseEntity<?> changeEtudiantClasse(@RequestBody ChangeClasse changeClasse) {
         if (changeClasse.getInscription().getSousClasse().getId() != changeClasse.getSousClasse().getId()) {

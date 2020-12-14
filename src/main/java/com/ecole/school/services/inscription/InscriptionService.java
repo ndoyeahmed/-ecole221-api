@@ -76,6 +76,10 @@ public class InscriptionService {
         return inscriptionRepository.findAllByAnneeScolaireAndArchiveFalse(anneeScolaire).orElse(new ArrayList<>());
     }
 
+    public List<Inscription> findAllInscriptionByEtudiantId(Long idEtudiant) {
+        return inscriptionRepository.findAllByEtudiantAndArchiveFalse(idEtudiant).orElse(new ArrayList<>());
+    }
+
     //----------- DocumentParEtudiant service
     public DocumentParEtudiant addDocumentParEtudiant(DocumentParEtudiant documentParEtudiant) {
         try {
