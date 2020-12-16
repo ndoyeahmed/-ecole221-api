@@ -1,7 +1,6 @@
 package com.ecole.school.config;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import com.ecole.school.security.CustomUserDetailService;
 import com.ecole.school.security.JwtAuthenticationEntryPoint;
@@ -22,26 +21,35 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    public void init(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-        authenticationManagerBuilder.userDetailsService(userDetailsService()).passwordEncoder(encoder());
+    public void init(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception{
+        authenticationManagerBuilder.
+                userDetailsService(userDetailsService()).
+                passwordEncoder(encoder());
     }
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().exceptionHandling().authenticationEntryPoint(entryPoint()).and()
-                .addFilterAfter(tokenFilter(), UsernamePasswordAuthenticationFilter.class).authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/api/login").permitAll().antMatchers("/socket").permitAll()
+        http
+            .cors().and()
+            .csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+                .exceptionHandling().authenticationEntryPoint(entryPoint())
+            .and().addFilterAfter(tokenFilter(), UsernamePasswordAuthenticationFilter.class)
+                .authorizeRequests()
+                .antMatchers(HttpMethod.POST, "/api/login").permitAll()
+                .antMatchers( "/socket").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/forgot-password").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/retrieve-email").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/change-password").permitAll().antMatchers("/api/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/change-password").permitAll()
+                .antMatchers("/api/**").permitAll()
                 .anyRequest().authenticated();
     }
 
@@ -51,24 +59,16 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    UserDetailsService userDetailService() {
-        return new CustomUserDetailService();
-    }
+    UserDetailsService userDetailService() { return new CustomUserDetailService(); }
 
     @Bean
-    BCryptPasswordEncoder encoder() {
-        return new BCryptPasswordEncoder();
-    }
+    BCryptPasswordEncoder encoder() { return new BCryptPasswordEncoder(); }
 
     @Bean
-    JwtAuthenticationEntryPoint entryPoint() {
-        return new JwtAuthenticationEntryPoint();
-    }
+    JwtAuthenticationEntryPoint entryPoint() { return new JwtAuthenticationEntryPoint(); }
 
     @Bean
-    JwtAuthenticationTokenFilter tokenFilter() {
-        return new JwtAuthenticationTokenFilter();
-    }
+    JwtAuthenticationTokenFilter tokenFilter() { return new JwtAuthenticationTokenFilter(); }
 
     @Bean
     public AuthenticationManager customAuthenticationManager() throws Exception {
@@ -78,7 +78,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "https://ecole221-web.vercel.app/"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
         configuration.setExposedHeaders(Arrays.asList("x-auth-token"));
