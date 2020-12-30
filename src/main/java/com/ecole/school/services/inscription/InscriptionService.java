@@ -57,6 +57,10 @@ public class InscriptionService {
         return etudiantRepository.findByCin(cin).orElse(null);
     }
 
+    public List<Etudiant> findAllEtudiant() {
+        return etudiantRepository.findAll();
+    }
+
     //----------- Inscription service
     public Inscription addInscription(Inscription inscription) {
         try {

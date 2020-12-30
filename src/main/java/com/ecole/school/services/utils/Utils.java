@@ -3,7 +3,12 @@ package com.ecole.school.services.utils;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
+import java.util.List;
 import java.util.UUID;
+
+import com.ecole.school.models.Etudiant;
+import com.ecole.school.models.Inscription;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,5 +49,14 @@ public class Utils {
   public String generatePassword() {
     String generatedString = RandomStringUtils.random(10, true, true);
     return generatedString;
-}
+  }
+
+  // generate matricule pour etudiant
+  public String genereMatriculeEtudiant(String specialiteNUm, String annee, List<Etudiant> etudiants) {
+    if (etudiants == null || etudiants.isEmpty()) {
+      return specialiteNUm + annee + "000000001";
+    } else {
+      return specialiteNUm + annee + new DecimalFormat("00000000").format(etudiants.size() + 1);
+    }
+  }
 }

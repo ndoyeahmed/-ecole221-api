@@ -82,30 +82,90 @@ public class InscriptionController {
             inscriptionPOJO.setInscription(new Inscription());
         }
 
+        // get annee scolaire en cours
+        AnneeScolaire anneeScolaire = parametrageBaseService.findAnneeScolaireEnCours();
+
         // bloc to add etudiant
         Etudiant etudiant = inscriptionPOJO.getEtudiant();
-        etudiant = inscriptionService.addEtudiant(etudiant);
+        if (etudiant.getId() == null && etudiant.getMatricule() == null) {
+            etudiant.setMatricule(
+                    utils.genereMatriculeEtudiant(inscriptionPOJO.getSousClasse().getSpecialite().getNum(),
+                            anneeScolaire.getAnnee() + "", inscriptionService.findAllEtudiant()));
 
-        // create compte etudiant
-        Profil profilEtudiant = utilisateurService.findProfilByLibelle("ETUDIANT");
-        Utilisateur etudiantUser = new Utilisateur();
-        etudiantUser.setCin(etudiant.getCin());
-        etudiantUser.setEmail(etudiant.getEmail());
-        etudiantUser.setNom(etudiant.getNom());
-        etudiantUser.setPrenom(etudiant.getPrenom());
-        etudiantUser.setTelephone(etudiant.getTelephone());
-        etudiantUser.setProfil(profilEtudiant);
-        etudiantUser.setArchive(false);
-        etudiantUser.setEtat(true);
-        etudiantUser.setLogin(etudiant.getEmail());
-        etudiantUser.setPassword(utils.encodePassword(utils.generatePassword()));
-        etudiantUser = utilisateurService.addUser(etudiantUser);
-        utilisateurService.email(etudiantUser, etudiantUser.getPassword());
-        // end bloc to add etudiant
+            etudiant = inscriptionService.addEtudiant(etudiant);
+
+            // create compte etudiant
+            Profil profilEtudiant = utilisateurService.findProfilByLibelle("ETUDIANT");
+            Utilisateur etudiantUser = new Utilisateur();
+            etudiantUser.setCin(etudiant.getCin());
+            etudiantUser.setEmail(etudiant.getEmail());
+            etudiantUser.setNom(etudiant.getNom());
+            etudiantUser.setPrenom(etudiant.getPrenom());
+            etudiantUser.setTelephone(etudiant.getTelephone());
+            etudiantUser.setProfil(profilEtudiant);
+            etudiantUser.setArchive(false);
+            etudiantUser.setEtat(true);
+            etudiantUser.setLogin(etudiant.getEmail());
+            etudiantUser.setPassword(utils.encodePassword(utils.generatePassword()));
+            etudiantUser = utilisateurService.addUser(etudiantUser);
+            utilisateurService.email(etudiantUser, etudiantUser.getPassword());
+            // end bloc to add etudiant
+
+            // bloc to add Parent
+            Utilisateur mere = inscriptionPOJO.getMere();
+            if (mere != null && mere.getCin() != null) {
+                Profil profilMere = utilisateurService.findProfilByLibelle("MERE");
+                mere.setProfil(profilMere);
+                mere.setArchive(false);
+                mere.setLogin(mere.getNom().trim().substring(0, 1) + "mere");
+                mere.setPassword(utils.encodePassword(utils.generatePassword()));
+                mere = utilisateurService.addUser(mere);
+                EtudiantTuteur etudiantTuteur = new EtudiantTuteur();
+                etudiantTuteur.setEtudiant(etudiant);
+                etudiantTuteur.setTuteur(mere);
+                inscriptionService.addEtudiantTuteur(etudiantTuteur);
+            }
+            Utilisateur pere = inscriptionPOJO.getPere();
+            if (pere != null && pere.getCin() != null) {
+                Profil profilPere = utilisateurService.findProfilByLibelle("PERE");
+                pere.setProfil(profilPere);
+                pere.setArchive(false);
+                pere.setLogin(pere.getNom().trim().substring(0, 1) + "pere");
+                pere.setPassword(utils.encodePassword(utils.generatePassword()));
+                pere = utilisateurService.addUser(pere);
+                EtudiantTuteur etudiantTuteur = new EtudiantTuteur();
+                etudiantTuteur.setEtudiant(etudiant);
+                etudiantTuteur.setTuteur(pere);
+                inscriptionService.addEtudiantTuteur(etudiantTuteur);
+            }
+            Utilisateur tuteur = inscriptionPOJO.getTuteur();
+            if (tuteur != null && tuteur.getCin() != null) {
+                Profil profilTuteur = utilisateurService.findProfilByLibelle("TUTEUR");
+                tuteur.setProfil(profilTuteur);
+                tuteur.setArchive(false);
+                tuteur.setLogin(tuteur.getNom().trim().substring(0, 1) + "tuteur");
+                tuteur.setPassword(utils.encodePassword(utils.generatePassword()));
+                tuteur = utilisateurService.addUser(tuteur);
+                EtudiantTuteur etudiantTuteur = new EtudiantTuteur();
+                etudiantTuteur.setEtudiant(etudiant);
+                etudiantTuteur.setTuteur(tuteur);
+                inscriptionService.addEtudiantTuteur(etudiantTuteur);
+            }
+            // end bloc to add Parent
+
+            // bloc to add document par Etudiant
+            for (Document d : inscriptionPOJO.getDocuments()) {
+                DocumentParEtudiant documentParEtudiant = new DocumentParEtudiant();
+                documentParEtudiant.setDocument(d);
+                documentParEtudiant.setEtudiant(etudiant);
+                inscriptionService.addDocumentParEtudiant(documentParEtudiant);
+            }
+            // end bloc to add document par etudiant
+        }
 
         // bloc to add inscription
         Inscription inscription = inscriptionPOJO.getInscription();
-        inscription.setAnneeScolaire(parametrageBaseService.findAnneeScolaireEnCours());
+        inscription.setAnneeScolaire(anneeScolaire);
         inscription.setArchive(false);
         inscription.setDate(Timestamp.valueOf(LocalDateTime.now()));
         inscription.setEtudiant(etudiant);
@@ -113,57 +173,6 @@ public class InscriptionController {
 
         inscription = inscriptionService.addInscription(inscription);
         // end bloc to add inscription
-
-        // bloc to add Parent
-        Utilisateur mere = inscriptionPOJO.getMere();
-        if (mere != null && mere.getCin() != null) {
-            Profil profilMere = utilisateurService.findProfilByLibelle("MERE");
-            mere.setProfil(profilMere);
-            mere.setArchive(false);
-            mere.setLogin(mere.getNom().trim().substring(0, 1) + "mere");
-            mere.setPassword(utils.encodePassword(utils.generatePassword()));
-            mere = utilisateurService.addUser(mere);
-            EtudiantTuteur etudiantTuteur = new EtudiantTuteur();
-            etudiantTuteur.setEtudiant(etudiant);
-            etudiantTuteur.setTuteur(mere);
-            inscriptionService.addEtudiantTuteur(etudiantTuteur);
-        }
-        Utilisateur pere = inscriptionPOJO.getPere();
-        if (pere != null && pere.getCin() != null) {
-            Profil profilPere = utilisateurService.findProfilByLibelle("PERE");
-            pere.setProfil(profilPere);
-            pere.setArchive(false);
-            pere.setLogin(pere.getNom().trim().substring(0, 1) + "pere");
-            pere.setPassword(utils.encodePassword(utils.generatePassword()));
-            pere = utilisateurService.addUser(pere);
-            EtudiantTuteur etudiantTuteur = new EtudiantTuteur();
-            etudiantTuteur.setEtudiant(etudiant);
-            etudiantTuteur.setTuteur(pere);
-            inscriptionService.addEtudiantTuteur(etudiantTuteur);
-        }
-        Utilisateur tuteur = inscriptionPOJO.getTuteur();
-        if (tuteur != null && tuteur.getCin() != null) {
-            Profil profilTuteur = utilisateurService.findProfilByLibelle("TUTEUR");
-            tuteur.setProfil(profilTuteur);
-            tuteur.setArchive(false);
-            tuteur.setLogin(tuteur.getNom().trim().substring(0, 1) + "tuteur");
-            tuteur.setPassword(utils.encodePassword(utils.generatePassword()));
-            tuteur = utilisateurService.addUser(tuteur);
-            EtudiantTuteur etudiantTuteur = new EtudiantTuteur();
-            etudiantTuteur.setEtudiant(etudiant);
-            etudiantTuteur.setTuteur(tuteur);
-            inscriptionService.addEtudiantTuteur(etudiantTuteur);
-        }
-        // end bloc to add Parent
-
-        // bloc to add document par Etudiant
-        for (Document d : inscriptionPOJO.getDocuments()) {
-            DocumentParEtudiant documentParEtudiant = new DocumentParEtudiant();
-            documentParEtudiant.setDocument(d);
-            documentParEtudiant.setEtudiant(etudiant);
-            inscriptionService.addDocumentParEtudiant(documentParEtudiant);
-        }
-        // end bloc to add document par etudiant
 
         return ResponseEntity.status(HttpStatus.CREATED).body(inscription);
     }
@@ -176,18 +185,22 @@ public class InscriptionController {
 
     @GetMapping("inscription/{id}")
     public ResponseEntity<?> getInscriptionById(@PathVariable Long id) {
-        if (id == null) throw new BadRequestException("id required");
+        if (id == null)
+            throw new BadRequestException("id required");
         Inscription inscription = inscriptionService.findInscriptionById(id);
-        if (inscription == null) throw new BadRequestException("inscription not found");
+        if (inscription == null)
+            throw new BadRequestException("inscription not found");
 
         return ResponseEntity.ok(inscription);
     }
 
     @GetMapping("etudiant/inscriptions/{idInscription}")
     public ResponseEntity<?> getAllEtudiantInscription(@PathVariable Long idInscription) {
-        if (idInscription == null) throw new BadRequestException("idInscription required");
+        if (idInscription == null)
+            throw new BadRequestException("idInscription required");
         Inscription inscription = inscriptionService.findInscriptionById(idInscription);
-        if (inscription == null) throw new BadRequestException("inscription not found");
+        if (inscription == null)
+            throw new BadRequestException("inscription not found");
 
         return ResponseEntity.ok(inscriptionService.findAllInscriptionByEtudiantId(inscription.getEtudiant().getId()));
     }
