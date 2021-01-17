@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 
 import lombok.Data;
 import lombok.ToString;
@@ -37,8 +38,9 @@ public class Etudiant {
     private String metier;
     private String ambition;
     private String autresRenseignements;
-    @Lob
     private String photo;
+    @Transient
+    private String fileType;
 
     @ManyToOne
     @JoinColumn(name = "pays", referencedColumnName = "id")

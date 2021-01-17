@@ -2,6 +2,7 @@ package com.ecole.school.web.controllers.parametrages;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -13,8 +14,11 @@ import com.ecole.school.models.SemestreNiveau;
 import com.ecole.school.models.Specialite;
 import com.ecole.school.services.parametrages.*;
 import com.ecole.school.services.utils.Utils;
+import com.ecole.school.web.POJO.NiveauPOJO;
+import com.ecole.school.web.POJO.SpecialitePOJO;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
+import com.ecole.school.web.exceptions.InternalServerErrorException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -111,7 +115,12 @@ public class ParametrageSpecialiteController {
 
     // ----------------- NIVEAU ENDPOINTS
     @PostMapping("niveau")
-    public ResponseEntity<?> addNiveau(@RequestBody Niveau niveau) {
+    public ResponseEntity<?> addNiveau(@RequestBody NiveauPOJO niveauPOJO) {
+        if (niveauPOJO == null) throw new BadRequestException("bodye required");
+
+        Niveau niveau = niveauPOJO.getNiveau();
+        List<DocumentParNiveau> documentParNiveaus = niveauPOJO.getDocumentParNiveaus();
+        List<SemestreNiveau> semestreNiveaus = niveauPOJO.getSemestreNiveaus();
         if (niveau == null)
             throw new BadRequestException("body is required");
         if (niveau.getLibelle() == null || niveau.getLibelle().trim().equals(""))
@@ -120,11 +129,31 @@ public class ParametrageSpecialiteController {
             throw new BadRequestException("cycle required");
         if (niveau.getParcours() == null)
             throw new BadRequestException("parcours required");
+        if (semestreNiveaus == null)
+            throw new BadRequestException("body is required");
+        if (semestreNiveaus.isEmpty())
+            throw new BadRequestException("body is required");
+        if (documentParNiveaus == null)
+            throw new BadRequestException("body is required");
+        if (documentParNiveaus.isEmpty())
+            throw new BadRequestException("body is required");
 
         niveau.setArchive(false);
         niveau.setEtat(true);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(parametrageSpecialiteService.addNiveau(niveau));
+        parametrageSpecialiteService.addNiveau(niveau);
+
+        for (DocumentParNiveau d : documentParNiveaus) {
+            d.setNiveau(niveau);
+            parametrageSpecialiteService.addDocumentParNiveau(d);
+        };
+
+        for(SemestreNiveau d : semestreNiveaus) {
+            d.setNiveau(niveau);
+            parametrageSpecialiteService.addSemestreNiveau(d);
+        };
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(Collections.singletonMap("response", true));
     }
 
     @GetMapping("niveau")
@@ -140,7 +169,8 @@ public class ParametrageSpecialiteController {
         if (niveau == null)
             throw new EntityNotFoundException("entity not found");
 
-        List<DocumentParNiveau> documentParNiveau = parametrageSpecialiteService.findAllDocumentParNiveauByNiveau(niveau);
+        List<DocumentParNiveau> documentParNiveau = parametrageSpecialiteService
+                .findAllDocumentParNiveauByNiveau(niveau);
         if (!documentParNiveau.isEmpty()) {
             documentParNiveau.parallelStream().forEach(x -> {
                 x.setArchive(true);
@@ -155,7 +185,7 @@ public class ParametrageSpecialiteController {
                 parametrageSpecialiteService.addSemestreNiveau(x);
             });
         }
-        
+
         niveau.setArchive(true);
         return ResponseEntity.ok(parametrageSpecialiteService.addNiveau(niveau));
     }
@@ -267,7 +297,8 @@ public class ParametrageSpecialiteController {
             throw new BadRequestException("body is required");
 
         semestreNiveaus.parallelStream().forEach(d -> {
-            if (parametrageSpecialiteService.findSemestreNiveauBySemestreAndNiveau(d.getSemestre(),d.getNiveau()) == null) {
+            if (parametrageSpecialiteService.findSemestreNiveauBySemestreAndNiveau(d.getSemestre(),
+                    d.getNiveau()) == null) {
                 parametrageSpecialiteService.addSemestreNiveau(d);
             }
         });
@@ -316,20 +347,36 @@ public class ParametrageSpecialiteController {
 
     // ----------------- SPECIALITE ENDPOINTS
     @PostMapping("specialite")
-    public ResponseEntity<?> addSpecialite(@RequestBody Specialite specialite)
-            throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        if (specialite == null)
+    public ResponseEntity<?> addSpecialite(@RequestBody SpecialitePOJO specialitePOJO)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException, InternalServerErrorException {
+        if (specialitePOJO == null || specialitePOJO.getSpecialite() == null
+                || specialitePOJO.getNiveauSpecialites() == null)
             throw new BadRequestException("body is required");
-        if (specialite.getLibelle() == null || specialite.getLibelle().trim().equals(""))
+        if (specialitePOJO.getSpecialite().getLibelle() == null
+                || specialitePOJO.getSpecialite().getLibelle().trim().equals(""))
             throw new BadRequestException("libelle is required");
-        if (specialite.getMention() == null)
+        if (specialitePOJO.getSpecialite().getMention() == null)
             throw new BadRequestException("mention required");
 
+        Specialite specialite = specialitePOJO.getSpecialite();
         specialite.setNum(utils.generateUniqueId());
         specialite.setArchive(false);
         specialite.setEtat(true);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(parametrageSpecialiteService.addSpecialite(specialite));
+        parametrageSpecialiteService.addSpecialite(specialite);
+
+        List<NiveauSpecialite> niveauSpecialites = specialitePOJO.getNiveauSpecialites();
+        for (NiveauSpecialite d : niveauSpecialites) {
+            d.setSpecialite(specialite);
+            parametrageSpecialiteService.addNiveauSpecialite(d);
+            /*
+             * if (parametrageSpecialiteService.findNiveauSpecialiteByNiveauAndSpecialite(d.
+             * getNiveau(), specialite) == null) {
+             * 
+             * }
+             */
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(Collections.singletonMap("response", true));
     }
 
     @GetMapping("specialite")
@@ -345,7 +392,8 @@ public class ParametrageSpecialiteController {
         if (specialite == null)
             throw new EntityNotFoundException("entity not found");
 
-        List<NiveauSpecialite> niveauSpecialites = parametrageSpecialiteService.findAllNiveauSpecialiteBySpecialite(specialite);
+        List<NiveauSpecialite> niveauSpecialites = parametrageSpecialiteService
+                .findAllNiveauSpecialiteBySpecialite(specialite);
         if (!niveauSpecialites.isEmpty()) {
             niveauSpecialites.parallelStream().forEach(x -> {
                 x.setArchive(true);
@@ -395,7 +443,6 @@ public class ParametrageSpecialiteController {
         return ResponseEntity.ok(parametrageSpecialiteService.addSpecialite(specialite));
     }
 
-
     // ----------------- NIVEAU SPECIALITE ENDPOINTS
     @PostMapping("niveau-specialite")
     public ResponseEntity<?> addNiveauSpecialite(@RequestBody List<NiveauSpecialite> niveauSpecialites) {
@@ -405,7 +452,8 @@ public class ParametrageSpecialiteController {
             throw new BadRequestException("body is required");
 
         niveauSpecialites.parallelStream().forEach(d -> {
-            if (parametrageSpecialiteService.findNiveauSpecialiteByNiveauAndSpecialite(d.getNiveau(), d.getSpecialite()) == null) {
+            if (parametrageSpecialiteService.findNiveauSpecialiteByNiveauAndSpecialite(d.getNiveau(),
+                    d.getSpecialite()) == null) {
                 parametrageSpecialiteService.addNiveauSpecialite(d);
             }
         });

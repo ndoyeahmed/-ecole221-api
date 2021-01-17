@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.ecole.school.models.Etudiant;
 import com.ecole.school.models.Inscription;
+import com.ecole.school.models.Specialite;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,15 @@ public class Utils {
       return specialiteNUm + annee + "000000001";
     } else {
       return specialiteNUm + annee + new DecimalFormat("00000000").format(etudiants.size() + 1);
+    }
+  }
+
+  // generate num pour specialite
+  public String genereNumSpecialite(List<Specialite> specialites) {
+    if (specialites == null || specialites.isEmpty()) {
+      return "01";
+    } else {
+      return new DecimalFormat("0").format(specialites.size() + 1);
     }
   }
 }

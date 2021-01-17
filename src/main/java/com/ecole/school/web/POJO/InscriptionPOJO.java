@@ -1,6 +1,6 @@
 package com.ecole.school.web.POJO;
 
-import com.ecole.school.models.Document;
+import com.ecole.school.models.DocumentParEtudiant;
 import com.ecole.school.models.Etudiant;
 import com.ecole.school.models.Inscription;
 import com.ecole.school.models.SousClasse;
@@ -20,5 +20,5 @@ public class InscriptionPOJO {
     private Utilisateur mere;
     private Utilisateur tuteur;
     private SousClasse sousClasse;
-    private List<Document> documents;
+    private List<DocumentParEtudiant> documents;
 }

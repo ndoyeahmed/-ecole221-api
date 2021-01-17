@@ -183,6 +183,14 @@ public class ParametrageSpecialiteService {
         return specialiteRepository.findById(id).orElse(null);
     }
 
+    public Specialite findSpecialiteByLibelle(String libelle) {
+        try {
+            return specialiteRepository.findByLibelleAndArchiveFalse(libelle).orElse(null);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
     public List<Specialite> findAllSpecialite() {
         return specialiteRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
     }
@@ -203,7 +211,11 @@ public class ParametrageSpecialiteService {
     }
 
     public NiveauSpecialite findNiveauSpecialiteByNiveauAndSpecialite(Niveau niveau, Specialite specialite) {
-        return niveauSpecialiteRepository.findByNiveauAndSpecialiteAndArchiveFalse(niveau, specialite).orElse(null);
+        try {
+            return niveauSpecialiteRepository.findByNiveauAndSpecialiteAndArchiveFalse(niveau, specialite).orElse(null);
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     public List<NiveauSpecialite> findAllNiveauSpecialiteBySpecialite(Specialite specialite) {

@@ -1,8 +1,14 @@
 package com.ecole.school.web.controllers.inscription;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,6 +30,7 @@ import com.ecole.school.services.parametrages.ParametrageBaseService;
 import com.ecole.school.services.parametrages.ParametrageClasseService;
 import com.ecole.school.services.parametrages.ParametrageReferentielService;
 import com.ecole.school.services.userconfig.*;
+import com.ecole.school.services.utils.FileStorageService;
 import com.ecole.school.services.utils.Utils;
 import com.ecole.school.web.POJO.ChangeClasse;
 import com.ecole.school.web.POJO.InscriptionPOJO;
@@ -54,11 +61,13 @@ public class InscriptionController {
     private ParametrageReferentielService parametrageReferentielService;
     private NoteService noteService;
     private Utils utils;
+    private FileStorageService storageService;
 
     @Autowired
     public InscriptionController(InscriptionService inscriptionService, ParametrageBaseService ParametrageBaseService,
             UtilisateurService utilisateurService, Utils utils, ParametrageClasseService parametrageClasseService,
-            ParametrageReferentielService parametrageReferentielService, NoteService noteService) {
+            ParametrageReferentielService parametrageReferentielService, NoteService noteService,
+            FileStorageService storageService) {
 
         this.inscriptionService = inscriptionService;
         this.parametrageBaseService = ParametrageBaseService;
@@ -67,11 +76,13 @@ public class InscriptionController {
         this.parametrageClasseService = parametrageClasseService;
         this.parametrageReferentielService = parametrageReferentielService;
         this.noteService = noteService;
+        this.storageService = storageService;
     }
 
     // -------------Inscription ENDPOINTS
     @PostMapping("inscription")
-    public ResponseEntity<?> inscription(@RequestBody InscriptionPOJO inscriptionPOJO) {
+    public ResponseEntity<?> inscription(@RequestBody InscriptionPOJO inscriptionPOJO)
+            throws FileNotFoundException, IOException {
         if (inscriptionPOJO == null)
             throw new BadRequestException("body required");
         if (inscriptionPOJO.getEtudiant() == null || inscriptionPOJO.getEtudiant().getCin() == null)
@@ -93,6 +104,37 @@ public class InscriptionController {
                             anneeScolaire.getAnnee() + "", inscriptionService.findAllEtudiant()));
 
             etudiant = inscriptionService.addEtudiant(etudiant);
+
+            // upload photo profil etudiant
+            if (etudiant.getPhoto() != null && !etudiant.getPhoto().trim().equals("")) {
+                String docName = etudiant.getMatricule();
+                String resp = etudiant.getPhoto();
+                resp = resp.replace("data:image/jpeg;base64,", "");
+                byte[] imageByte = Base64.getMimeDecoder().decode(resp.trim().split(",")[0]);
+                String filename = "/photo_profil_etudiants/" + docName + ".jpg";
+
+                String dossier = System.getProperty("user.home") + "/ecole221files/";
+
+                if (etudiant.getFileType().equals("image/png")) {
+                    filename = "/photo_profil_etudiants/" + docName + ".png";
+                } else if (etudiant.getFileType().equals("image/jpg")) {
+                    filename = "/photo_profil_etudiants/" + docName + ".jpg";
+                } else if (etudiant.getFileType().equals("image/jpeg")) {
+                    filename = "/photo_profil_etudiants/" + docName + ".jpeg";
+                }
+
+                String directory = dossier + "/uploads" + filename;
+                File chemin = new File(dossier + "uploads/photo_profil_etudiants");
+                if (!chemin.exists()) {
+                    chemin.mkdirs();
+                }
+                FileOutputStream out = new FileOutputStream(directory);
+                out.write(imageByte);
+                out.close();
+
+                etudiant.setPhoto(directory);
+            }
+            // end upload
 
             // create compte etudiant
             Profil profilEtudiant = utilisateurService.findProfilByLibelle("ETUDIANT");
@@ -152,16 +194,44 @@ public class InscriptionController {
                 inscriptionService.addEtudiantTuteur(etudiantTuteur);
             }
             // end bloc to add Parent
-
-            // bloc to add document par Etudiant
-            for (Document d : inscriptionPOJO.getDocuments()) {
-                DocumentParEtudiant documentParEtudiant = new DocumentParEtudiant();
-                documentParEtudiant.setDocument(d);
-                documentParEtudiant.setEtudiant(etudiant);
-                inscriptionService.addDocumentParEtudiant(documentParEtudiant);
-            }
-            // end bloc to add document par etudiant
         }
+
+        // bloc to add document par Etudiant
+        for (DocumentParEtudiant d : inscriptionPOJO.getDocuments()) {
+            // storageService.save(d.getFile());
+            // This will decode the String which is encoded by using Base64 class
+            String docName = d.getDocument().getLibelle() + etudiant.getNom() + etudiant.getMatricule();
+            String resp = d.getFile();
+            resp = resp.replace("data:image/jpeg;base64,", "");
+            byte[] imageByte = Base64.getMimeDecoder().decode(resp.trim().split(",")[1]);
+            String filename = "/pdf/" + docName + ".pdf";
+
+            String dossier = System.getProperty("user.home") + "/ecole221files/";
+
+            if (d.getFileType().equals("image/png")) {
+                filename = "/image/" + docName + ".png";
+            } else if (d.getFileType().equals("image/jpg")) {
+                filename = "/image/" + docName + ".jpg";
+            } else if (d.getFileType().equals("image/jpeg")) {
+                filename = "/image/" + docName + ".jpeg";
+            } else if (d.getFileType().equals("application/pdf")) {
+                filename = "/pdf/" + docName + ".pdf";
+            }
+
+            String directory = dossier + "/uploads" + filename;
+            File chemin = new File(dossier + "uploads");
+            if (!chemin.exists()) {
+                chemin.mkdirs();
+            }
+            FileOutputStream out = new FileOutputStream(directory);
+            out.write(imageByte);
+            out.close();
+
+            d.setUrl(directory);
+            d.setEtudiant(etudiant);
+            inscriptionService.addDocumentParEtudiant(d);
+        }
+        // end bloc to add document par etudiant
 
         // bloc to add inscription
         Inscription inscription = inscriptionPOJO.getInscription();
