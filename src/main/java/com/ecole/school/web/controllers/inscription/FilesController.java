@@ -1,13 +1,22 @@
 package com.ecole.school.web.controllers.inscription;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.imageio.ImageIO;
 
 import com.ecole.school.services.utils.FileInfo;
 import com.ecole.school.services.utils.FileStorageService;
 import com.ecole.school.web.POJO.ResponseMessage;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,6 +25,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -68,5 +79,21 @@ public class FilesController {
     Resource file = storageService.load(filename);
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+  }
+
+  @PutMapping("/files/base64")
+  public ResponseEntity<?> getImages(@RequestBody String filename) {
+    try {
+
+      final InputStream inputStream = new FileInputStream(new File(filename));
+      final byte[] bytes = IOUtils.toByteArray(inputStream);
+      final String encodedImage = Base64.getEncoder().encodeToString(bytes);
+
+      return ResponseEntity.ok(Collections.singletonMap("response", encodedImage));
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    throw new RuntimeException("oops!");
   }
 }

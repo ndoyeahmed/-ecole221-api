@@ -1,5 +1,6 @@
 package com.ecole.school.web.controllers.inscription;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -31,6 +32,7 @@ import com.ecole.school.services.parametrages.ParametrageClasseService;
 import com.ecole.school.services.parametrages.ParametrageReferentielService;
 import com.ecole.school.services.userconfig.*;
 import com.ecole.school.services.utils.FileStorageService;
+import com.ecole.school.services.utils.PDFGenerator;
 import com.ecole.school.services.utils.Utils;
 import com.ecole.school.web.POJO.ChangeClasse;
 import com.ecole.school.web.POJO.InscriptionPOJO;
@@ -38,7 +40,10 @@ import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -77,6 +82,24 @@ public class InscriptionController {
         this.parametrageReferentielService = parametrageReferentielService;
         this.noteService = noteService;
         this.storageService = storageService;
+    }
+
+    // generate ID card 
+    @GetMapping(value = "/carte-etudiants",
+            produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<InputStreamResource> customersReport() throws IOException {
+        List<Etudiant> etudiants = (List<Etudiant>) inscriptionService.findAllEtudiant();
+ 
+        ByteArrayInputStream bis = PDFGenerator.customerPDFReport(etudiants);
+ 
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "inline; filename=customers.pdf");
+ 
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(bis));
     }
 
     // -------------Inscription ENDPOINTS
@@ -123,7 +146,7 @@ public class InscriptionController {
                     filename = "/photo_profil_etudiants/" + docName + ".jpeg";
                 }
 
-                String directory = dossier + "/uploads" + filename;
+                String directory = dossier + "uploads" + filename;
                 File chemin = new File(dossier + "uploads/photo_profil_etudiants");
                 if (!chemin.exists()) {
                     chemin.mkdirs();
@@ -247,9 +270,14 @@ public class InscriptionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(inscription);
     }
 
-    @GetMapping("inscription")
-    public ResponseEntity<?> getAllInscription() {
-        AnneeScolaire anneeScolaire = parametrageBaseService.findAnneeScolaireEnCours();
+    @GetMapping("inscription/annee/{idAnneeScolaire}")
+    public ResponseEntity<?> getAllInscription(@PathVariable Long idAnneeScolaire) {
+        if (idAnneeScolaire == null) throw new BadRequestException("id annee scolaire requied");
+
+        AnneeScolaire anneeScolaire = parametrageBaseService.findAnneeScolaireById(idAnneeScolaire);
+
+        if (anneeScolaire == null) throw new BadRequestException("bad id");
+        
         return ResponseEntity.ok(inscriptionService.findAllInscriptionByAnneeScolaire(anneeScolaire));
     }
 

@@ -37,4 +37,7 @@ public class Inscription {
     @ManyToOne
     @JoinColumn(name = "etudiant", referencedColumnName = "id")
     private Etudiant etudiant;
+    @ManyToOne
+    @JoinColumn(name = "bourse", referencedColumnName = "id")
+    private Bourse bourse;
 }
