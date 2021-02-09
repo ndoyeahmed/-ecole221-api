@@ -16,6 +16,7 @@ public class Presence {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private boolean etat;
+    private String motif;
 
     @ManyToOne
     @JoinColumn(name = "inscription", referencedColumnName = "id")

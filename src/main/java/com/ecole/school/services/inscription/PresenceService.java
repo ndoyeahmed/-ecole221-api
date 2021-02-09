@@ -40,6 +40,10 @@ public class PresenceService {
         }
     }
 
+    public Presence findPresenceById(Long id) {
+        return presenceRepository.findById(id).orElse(null);
+    }
+
     public List<Presence> saveListPresence(List<Presence> presences) {
         try {
             presenceRepository.saveAll(presences);
