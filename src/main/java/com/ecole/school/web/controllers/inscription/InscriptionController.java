@@ -88,7 +88,7 @@ public class InscriptionController {
     @GetMapping(value = "/carte-etudiants",
             produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<InputStreamResource> customersReport() throws IOException {
-        List<Etudiant> etudiants = (List<Etudiant>) inscriptionService.findAllEtudiant();
+        List<Etudiant> etudiants = inscriptionService.findAllEtudiant();
  
         ByteArrayInputStream bis = PDFGenerator.customerPDFReport(etudiants);
  

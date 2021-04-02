@@ -152,4 +152,14 @@ public class ParametrageReferentielService {
     public List<ProgrammeModule> findAllProgrammeModuleByModuleAndProgrammeUE(Module module, ProgrammeUE programmeUE) {
         return programmeModuleRepository.findAllByModuleAndProgrammeUEAndArchiveFalse(module, programmeUE).orElse(new ArrayList<>());
     }
+
+    public List<ProgrammeModule> findAllProgrammeModuleByReferentiel(Referentiel referentiel) {
+        return programmeModuleRepository.findAllByArchiveFalseAndProgrammeUE_Referentiel(referentiel)
+                .orElse(new ArrayList<>());
+    }
+
+    public List<ProgrammeModule> findAllProgrammeModuleByReferentielAndSemestre(Referentiel referentiel, Semestre semestre) {
+        return programmeModuleRepository.findAllByArchiveFalseAndProgrammeUE_ReferentielAndProgrammeUE_Semestre(referentiel, semestre)
+                .orElse(new ArrayList<>());
+    }
 }

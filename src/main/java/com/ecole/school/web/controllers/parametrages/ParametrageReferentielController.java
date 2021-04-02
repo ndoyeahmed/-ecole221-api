@@ -1,11 +1,8 @@
 package com.ecole.school.web.controllers.parametrages;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.ecole.school.models.Module;
 import com.ecole.school.models.Niveau;
@@ -113,7 +110,7 @@ public class ParametrageReferentielController {
                         prModule.setTd(pm.getTd());
                         prModule.setTp(pm.getTp());
                         prModule.setTpe(pm.getTpe());
-                        prModule.setVh(pm.getVh());
+                        prModule.setVhp(pm.getVhp());
                         prModule.setVht(pm.getVht());
                         prModule.setModule(pm.getModule());
                         prModule.setProgrammeUE(pu);
@@ -357,7 +354,7 @@ public class ParametrageReferentielController {
     // ----------------- PROGRAMME MODULE ENDPOINTS
     @PostMapping("programme-module")
     public ResponseEntity<?> addProgrammeModule(@RequestBody ProgrammeModule programmeModule)
-            throws UnsupportedEncodingException, NoSuchAlgorithmException {
+            throws IOException, NoSuchAlgorithmException {
         if (programmeModule == null)
             throw new BadRequestException("body is required");
         if (programmeModule.getModule() == null || programmeModule.getModule().getId() == null)
@@ -367,6 +364,32 @@ public class ParametrageReferentielController {
 
         programmeModule.setCode(utils.generateUniqueId());
         programmeModule.setArchive(false);
+
+        // upload syllabus
+        if (programmeModule.getSyllabus() != null && !programmeModule.getSyllabus().trim().equals("")) {
+            String docName = programmeModule.getCode();
+            String resp = programmeModule.getSyllabus();
+            resp = resp.replace("data:application/pdf;base64,", "");
+            byte[] imageByte = Base64.getMimeDecoder().decode(resp.trim().split(",")[0]);
+            String filename = "/syllabus/" + programmeModule.getModule().getLibelle()
+                    + "/" + docName + ".pdf";
+
+            String dossier = System.getProperty("user.home") + "/ecole221files/";
+
+
+            String directory = dossier + "uploads" + filename;
+            File chemin = new File(dossier + "uploads/syllabus/"
+                    + programmeModule.getModule().getLibelle());
+            if (!chemin.exists()) {
+                chemin.mkdirs();
+            }
+            FileOutputStream out = new FileOutputStream(directory);
+            out.write(imageByte);
+            out.close();
+
+            programmeModule.setSyllabus(directory);
+        }
+        // end upload
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(parametrageReferentielService.addProgrammeModule(programmeModule));
@@ -432,5 +455,34 @@ public class ParametrageReferentielController {
 
         programmeModule.setArchive(true);
         return ResponseEntity.ok(parametrageReferentielService.addProgrammeModule(programmeModule));
+    }
+
+    @GetMapping("programme-module/programme-ue/referentiel/{referentielId}")
+    public ResponseEntity<?> getAllProgrammeModuleByReferentiel(@PathVariable Long referentielId) {
+        if (referentielId == null) throw new BadRequestException("referentielId not correct");
+
+        Referentiel referentiel = parametrageReferentielService.findReferentielById(referentielId);
+
+        if (referentiel == null) throw new BadRequestException("referentiel not found");
+
+        return ResponseEntity.ok(parametrageReferentielService
+                .findAllProgrammeModuleByReferentiel(referentiel));
+    }
+
+    @GetMapping("programme-module/programme-ue/referentiel/{referentielId}/semestre/{semestreId}")
+    public ResponseEntity<?> getAllProgrammeModuleByReferentielAndSemestre(@PathVariable Long referentielId
+            , @PathVariable Long semestreId) {
+
+        if (referentielId == null) throw new BadRequestException("referentielId not correct");
+        if (semestreId == null) throw new BadRequestException("semestreId not correct");
+
+        Referentiel referentiel = parametrageReferentielService.findReferentielById(referentielId);
+        Semestre semestre = parametrageSpecialiteService.findSemestreById(semestreId);
+
+        if (referentiel == null) throw new BadRequestException("referentiel not found");
+        if (semestre == null) throw new BadRequestException("semestre not found");
+
+        return ResponseEntity.ok(parametrageReferentielService
+                .findAllProgrammeModuleByReferentielAndSemestre(referentiel, semestre));
     }
 }

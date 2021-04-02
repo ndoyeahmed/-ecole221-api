@@ -21,11 +21,13 @@ public class ProgrammeModule {
     private int budget;
     private int coef;
     private int nbreCreditModule;
-    private int td;
-    private int tp;
-    private int tpe;
-    private int vh;
-    private int vht;
+    private String syllabus;
+    private int td; // nbr heures travaux dirigés
+    private int tp; // nbr heures travaux pratique
+    private int tpe; // nbr heures travail personnel etudiant
+    private int vhp; // volume horaire presentiel
+    private int cm; // nbr heures cours magistral
+    private int vht; // volume heures total
     @Column(columnDefinition = "boolean default false")
     private boolean archive;
 

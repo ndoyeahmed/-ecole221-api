@@ -8,6 +8,8 @@ import javax.persistence.Id;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
 @Entity
 public class AnneeScolaire {

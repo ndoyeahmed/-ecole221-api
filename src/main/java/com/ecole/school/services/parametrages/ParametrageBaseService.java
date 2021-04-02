@@ -3,14 +3,7 @@ package com.ecole.school.services.parametrages;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ecole.school.models.AnneeScolaire;
-import com.ecole.school.models.Cycle;
-import com.ecole.school.models.Document;
-import com.ecole.school.models.Domaine;
-import com.ecole.school.models.Horaire;
-import com.ecole.school.models.Mention;
-import com.ecole.school.models.Parcours;
-import com.ecole.school.models.Pays;
+import com.ecole.school.models.*;
 import com.ecole.school.repositories.AnneeScolaireRepository;
 import com.ecole.school.repositories.CycleRepository;
 import com.ecole.school.repositories.DocumentRepository;
