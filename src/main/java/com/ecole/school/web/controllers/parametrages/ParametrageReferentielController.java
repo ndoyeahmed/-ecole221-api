@@ -15,6 +15,7 @@ import com.ecole.school.services.parametrages.ParametrageModuleUEService;
 import com.ecole.school.services.parametrages.ParametrageReferentielService;
 import com.ecole.school.services.parametrages.ParametrageSpecialiteService;
 import com.ecole.school.services.utils.Utils;
+import com.ecole.school.web.POJO.RecapReferentiel;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
 
@@ -282,7 +283,10 @@ public class ParametrageReferentielController {
         if (programmeUE.getUe() == null || programmeUE.getUe().getId() == null)
             throw new BadRequestException("ue required");
 
-        programmeUE.setCode(utils.generateUniqueId());
+        programmeUE.setCode(utils.generateUECode(programmeUE.getUe().getLibelle(),
+                programmeUE.getReferentiel().getNiveau().getNiveau(),
+                programmeUE.getSemestre().getNumero(),
+                programmeUE.getUe().getNumero()));
         programmeUE.setArchive(false);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -362,7 +366,10 @@ public class ParametrageReferentielController {
         if (programmeModule.getProgrammeUE() == null || programmeModule.getProgrammeUE().getId() == null)
             throw new BadRequestException("programmeUE required");
 
-        programmeModule.setCode(utils.generateUniqueId());
+        programmeModule.setCode(utils.generateModuleCode(
+                programmeModule.getProgrammeUE().getCode(),
+                programmeModule.getModule().getNumero()
+        ));
         programmeModule.setArchive(false);
 
         // upload syllabus
@@ -398,6 +405,11 @@ public class ParametrageReferentielController {
     @GetMapping("programme-module")
     public ResponseEntity<?> getAllProgrammeModule() {
         return ResponseEntity.ok(parametrageReferentielService.findAllProgrammeModule());
+    }
+
+    @PostMapping("get-recap-referentiel")
+    public void getListRecapReferentiel(@RequestBody List<RecapReferentiel> recapReferentiels) {
+        System.out.println(recapReferentiels.get(0).getSemestre().getLibelle());
     }
 
     @GetMapping("programme-module/module/{moduleId}")

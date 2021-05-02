@@ -15,6 +15,7 @@ public class DetailsParametreClasse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private boolean etat;
 
     @ManyToOne
     @JoinColumn(name = "parametrePaiement", referencedColumnName = "id")

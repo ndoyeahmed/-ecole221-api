@@ -46,14 +46,13 @@ public class ParametrageModuleUEController {
 
     // ----------------- MODULE ENDPOINTS
     @PostMapping("modules")
-    public ResponseEntity<?> addModule(@RequestBody Module module)
-            throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public ResponseEntity<?> addModule(@RequestBody Module module) {
         if (module == null)
             throw new BadRequestException("body is required");
         if (module.getLibelle() == null || module.getLibelle().trim().equals(""))
             throw new BadRequestException("libelle is required");
 
-        module.setCode(utils.createCode(module.getLibelle()));
+//        module.setCode(utils.generateModuleCode("", module.getNumero()));
         module.setArchive(false);
         module.setEtat(true);
 
@@ -160,13 +159,13 @@ public class ParametrageModuleUEController {
 
     // ----------------- UE ENDPOINTS
     @PostMapping("ue")
-    public ResponseEntity<?> addUE(@RequestBody UE ue) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public ResponseEntity<?> addUE(@RequestBody UE ue) {
         if (ue == null)
             throw new BadRequestException("body is required");
         if (ue.getLibelle() == null || ue.getLibelle().trim().equals(""))
             throw new BadRequestException("libelle is required");
 
-        ue.setCode(utils.createCode(ue.getLibelle()));
+//        ue.setCode(utils.createCode(ue.getLibelle()));
         ue.setArchive(false);
         ue.setEtat(true);
 

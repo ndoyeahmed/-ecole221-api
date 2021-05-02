@@ -15,6 +15,7 @@ public class Semestre {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String libelle;
+    private int numero;
     private boolean etat;
     @Column(columnDefinition = "boolean default false")
     private boolean archive;

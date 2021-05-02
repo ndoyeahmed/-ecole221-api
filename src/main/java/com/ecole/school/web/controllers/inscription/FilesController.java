@@ -1,14 +1,14 @@
 package com.ecole.school.web.controllers.inscription;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
 
 import com.ecole.school.services.utils.FileInfo;
 import com.ecole.school.services.utils.FileStorageService;
@@ -95,5 +95,38 @@ public class FilesController {
       e.printStackTrace();
     }
     throw new RuntimeException("oops!");
+  }
+
+  @GetMapping(value = "/referentiel-upload-model/download")
+  public void getResource(HttpServletResponse response) throws IOException, IOException {
+
+    String fileLocation=System.getProperty("user.home") + "/ecole221files/referentiel/model/Referentiel_upload_Model.xlsx";
+
+            File downloadFile= new File(fileLocation);
+
+    byte[] isr = Files.readAllBytes(downloadFile.toPath());
+    ByteArrayOutputStream out = new ByteArrayOutputStream(isr.length);
+    out.write(isr, 0, isr.length);
+
+    response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    // Use 'inline' for preview and 'attachement' for download in browser.
+    response.addHeader("Content-Disposition", "attachment; filename=Referentiel_upload_Model.xlsx");
+
+    OutputStream os;
+    try {
+      os = response.getOutputStream();
+      out.writeTo(os);
+      os.flush();
+      os.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    /*HttpHeaders respHeaders = new HttpHeaders();
+    respHeaders.setContentLength(isr.length);
+    respHeaders.setContentType(new MediaType("text", "json"));
+    respHeaders.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+    respHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+    return new ResponseEntity<byte[]>(isr, respHeaders, HttpStatus.OK);*/
   }
 }

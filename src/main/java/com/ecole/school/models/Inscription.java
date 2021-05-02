@@ -1,6 +1,7 @@
 package com.ecole.school.models;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,6 +23,7 @@ public class Inscription {
     private Long id;
     private Timestamp date;
     private int passe;
+    private Timestamp dateAlertePaiement;
     @Column(columnDefinition = "boolean default false")
     private boolean archive;
 
@@ -40,4 +42,7 @@ public class Inscription {
     @ManyToOne
     @JoinColumn(name = "bourse", referencedColumnName = "id")
     private Bourse bourse;
+    @ManyToOne
+    @JoinColumn(name = "parametrePaiement", referencedColumnName = "id")
+    private ParametrePaiement parametrePaiement;
 }
