@@ -2,24 +2,30 @@ package com.ecole.school.services.utils;
 
 import com.ecole.school.web.POJO.RecapProgrammeModule;
 import com.ecole.school.web.POJO.RecapReferentiel;
+import lombok.extern.java.Log;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
+@Log
 @Component
 public class ExcelWriter {
 
-    // generate an excel file model for uploading programs
+    public static String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+    /**
+     * generate an excel file model for uploading programs
+     * @throws IOException e
+     */
     public void generateReferentielUploadModel() throws IOException {
 
         List<String> headers = Arrays.asList("Périodes", "Unité d'enseignement",
@@ -182,4 +188,142 @@ public class ExcelWriter {
         workbook.close();
         outputStream.close();
     }
+
+
+    /**
+     * Verify if it's an excel file or not
+     * @param file to test
+     * @return boolean true if it's an excel file false if not
+     */
+    public boolean hasExcelFormat(MultipartFile file) {
+
+        return TYPE.equals(file.getContentType());
+    }
+
+    /**
+     * Convert excel file to list recap referentiel
+     * @param is excel InputStream
+     * @return list recap referentiel
+     */
+    public List<RecapReferentiel> excelToRecapReferentiel(InputStream is) {
+        try {
+            Workbook workbook = new XSSFWorkbook(is);
+            Iterator<Sheet> sheetIterator = workbook.sheetIterator();
+            while (sheetIterator.hasNext()) {
+                Sheet sheet = sheetIterator.next();
+
+                Iterator<Row> rows = sheet.iterator();
+                int rowNumber = 0;
+                int cpt = 0;
+
+                while (rows.hasNext()) {
+                    Row currentRow = rows.next();
+                    if (rowNumber == 0 || rowNumber == 1) {
+                        rowNumber++;
+                    } else {
+                        System.out.println("row " + ++cpt);
+                        Iterator<Cell> cellsInRow = currentRow.iterator();
+
+                        int cellIdx = 0;
+                        while (cellsInRow.hasNext()) {
+                            Cell currentCell = cellsInRow.next();
+                            switch (cellIdx) {
+                                case 0:
+                                    System.out.println("cell 0");
+                                    if (currentCell != null && currentCell.getStringCellValue() != null) {
+                                        System.out.println(currentCell.getStringCellValue());
+                                    }
+                                    break;
+                                case 1:
+                                    System.out.println("cell 1");
+                                    if (currentCell != null && currentCell.getStringCellValue() != null) {
+                                        System.out.println(currentCell.getStringCellValue());
+                                    }
+                                    break;
+                                case 2:
+                                    System.out.println("cell 2");
+                                    if (currentCell != null && currentCell.getStringCellValue() != null) {
+                                        System.out.println(currentCell.getStringCellValue());
+                                    }
+                                    break;
+                                case 3:
+                                    System.out.println("cell 3");
+                                    if (currentCell != null && currentCell.getStringCellValue() != null) {
+                                        System.out.println(currentCell.getStringCellValue());
+                                    }
+                                    break;
+                                case 4:
+                                    System.out.println("cell 4");
+                                    try {
+                                        if (currentCell != null && currentCell.getNumericCellValue() != 0) {
+                                            System.out.println(currentCell.getNumericCellValue());
+                                        }
+                                    } catch (Exception e) {
+                                        log.info(e.getMessage());
+                                    }
+                                    break;
+                                case 5:
+                                    System.out.println("cell 5");
+                                    if (currentCell != null && currentCell.getNumericCellValue() != 0) {
+                                        System.out.println(currentCell.getNumericCellValue());
+                                    }
+                                    break;
+                                case 6:
+                                    System.out.println("cell 6");
+                                    if (currentCell != null && currentCell.getNumericCellValue() != 0) {
+                                        System.out.println(currentCell.getNumericCellValue());
+                                    }
+                                    break;
+                                case 7:
+                                    System.out.println("cell 7");
+                                    if (currentCell != null && currentCell.getNumericCellValue() != 0) {
+                                        System.out.println(currentCell.getNumericCellValue());
+                                    }
+                                    break;
+                                case 8:
+                                    System.out.println("cell 8");
+                                    if (currentCell != null && currentCell.getNumericCellValue() != 0) {
+                                        System.out.println(currentCell.getNumericCellValue());
+                                    }
+                                    break;
+                                case 9:
+                                    System.out.println("cell 9");
+                                    if (currentCell != null && currentCell.getNumericCellValue() != 0) {
+                                        System.out.println(currentCell.getNumericCellValue());
+                                    }
+                                    break;
+                                case 10:
+                                    System.out.println("cell 10");
+                                    if (currentCell != null && currentCell.getNumericCellValue() != 0) {
+                                        System.out.println(currentCell.getNumericCellValue());
+                                    }
+                                    break;
+                                case 11:
+                                    System.out.println("cell 11");
+                                    if (currentCell != null && currentCell.getNumericCellValue() != 0) {
+                                        System.out.println(currentCell.getNumericCellValue());
+                                    }
+                                    break;
+                                default:
+                                    System.out.println("default");
+                                    break;
+
+                            }
+                            cellIdx++;
+                        }
+                    }
+                }
+                System.out.println(rowNumber);
+            }
+
+            workbook.close();
+
+            return new ArrayList<>();
+//            return recapReferentiels;
+        } catch (IOException e) {
+            log.info(e.getMessage());
+            throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
+        }
+    }
+
 }
