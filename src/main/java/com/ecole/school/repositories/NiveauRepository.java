@@ -18,4 +18,6 @@ public interface NiveauRepository extends JpaRepository<Niveau, Long> {
     Optional<List<Niveau>> findAllByCycle(Cycle cycle);
 
     Optional<List<Niveau>> findAllByParcours(Parcours parcours);
+
+    Optional<Niveau> findByLibelleAndArchiveFalse(String libelle);
 }

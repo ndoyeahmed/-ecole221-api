@@ -49,6 +49,10 @@ public class ParametrageModuleUEService {
         }
     }
 
+    public Module findModuleByLibelle(String libelle) {
+        return moduleRepository.findByLibelleAndArchiveFalse(libelle).orElse(null);
+    }
+
     public Module findModuleById(Long id) {
         return moduleRepository.findById(id).orElse(null);
     }
@@ -89,6 +93,10 @@ public class ParametrageModuleUEService {
             log.severe(e.getLocalizedMessage());
             throw e;
         }
+    }
+
+    public UE findUEByCode(String code) {
+        return ueRepository.findByCodeAndArchiveFalse(code).orElse(null);
     }
 
     public UE findUEById(Long id) {

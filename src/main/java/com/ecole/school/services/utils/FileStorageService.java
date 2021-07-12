@@ -1,11 +1,14 @@
 package com.ecole.school.services.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Base64;
 import java.util.stream.Stream;
 
 import org.springframework.core.io.Resource;
@@ -60,5 +63,20 @@ public class FileStorageService {
         } catch (IOException e) {
             throw new RuntimeException("Could not load the files!");
         }
+    }
+
+    public String base64ToFile(String base64, String filename, String fileLocation) throws IOException {
+        String base64Image = base64.split(",")[1];
+        byte[] decodedImg = Base64.getDecoder()
+                .decode(base64Image.getBytes(StandardCharsets.UTF_8));
+        String directory = System.getProperty("user.home") + "/ecole221files/" + fileLocation;
+        File chemin = new File(directory);
+        if (!chemin.exists()) {
+            chemin.mkdirs();
+        }
+        Path destinationFile = Paths.get(directory, filename);
+        Files.write(destinationFile, decodedImg);
+
+        return destinationFile.toString();
     }
 }

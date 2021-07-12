@@ -9,5 +9,5 @@ import java.util.List;
 @Data
 public class RecapProgrammeModule {
     private ProgrammeUE programmeUE;
-    private List<ProgrammeModule> programmeModules;
+    private List<ProgrammeModule> programmeModuleList;
 }

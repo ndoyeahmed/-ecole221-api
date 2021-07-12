@@ -22,6 +22,7 @@ import com.ecole.school.web.POJO.ResponseMessage;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
 
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @CrossOrigin
+@Log
 @RequestMapping("/api/parametrage-referentiel/")
 public class ParametrageReferentielController {
     private ParametrageReferentielService parametrageReferentielService;
@@ -52,15 +54,17 @@ public class ParametrageReferentielController {
     // ----------------- REFERENTIEL ENDPOINTS
 
     @PostMapping("referentiel/upload")
-    public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
         String message = "";
         try {
             if (excelWriter.hasExcelFormat(file)) {
-                excelWriter.excelToRecapReferentiel(file.getInputStream());
-            }
-            message = "Uploaded the file successfully: " + file.getOriginalFilename();
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
+                return ResponseEntity.status(HttpStatus.CREATED)
+                        .body(excelWriter.excelToRecapReferentiel(file.getInputStream()));
+            } else return ResponseEntity.status(400)
+                    .body("incorrect file format");
+
         } catch (Exception e) {
+            log.severe(e.getMessage());
             message = "Could not upload the file: " + file.getOriginalFilename() + "!";
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
         }

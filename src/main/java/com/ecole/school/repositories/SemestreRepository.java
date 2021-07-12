@@ -11,4 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SemestreRepository extends JpaRepository<Semestre, Long> {
     Optional<List<Semestre>> findAllByArchiveFalse();
+    Optional<Semestre> findByLibelleAndArchiveFalse(String libelle);
 }

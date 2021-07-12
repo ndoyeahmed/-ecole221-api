@@ -8,5 +8,5 @@ import java.util.List;
 @Data
 public class RecapReferentiel {
     private Semestre semestre;
-    private List<RecapProgrammeModule> recapProgrammeModules;
+    private List<RecapProgrammeModule> listRecapProgrammeModule;
 }

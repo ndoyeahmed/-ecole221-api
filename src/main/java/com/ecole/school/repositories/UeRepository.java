@@ -11,4 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UeRepository extends JpaRepository<UE, Long> {
     Optional<List<UE>> findAllByArchiveFalse();
+    Optional<UE> findByCodeAndArchiveFalse(String code);
 }

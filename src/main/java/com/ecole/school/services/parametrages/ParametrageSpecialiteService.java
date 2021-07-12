@@ -63,6 +63,10 @@ public class ParametrageSpecialiteService {
         return semestreRepository.findById(id).orElse(null);
     }
 
+    public Semestre findSemestreByLibelle(String libelle) {
+        return semestreRepository.findByLibelleAndArchiveFalse(libelle).orElse(null);
+    }
+
     public List<Semestre> findAllSemestre() {
         return semestreRepository.findAllByArchiveFalse().orElse(new ArrayList<>());
     }
@@ -92,6 +96,10 @@ public class ParametrageSpecialiteService {
 
     public List<Niveau> findAllNiveauByParcours(Parcours parcours) {
         return niveauRepository.findAllByParcours(parcours).orElse(new ArrayList<>());
+    }
+
+    public Niveau findNiveauByLibelle(String libelle) {
+        return niveauRepository.findByLibelleAndArchiveFalse(libelle).orElse(null);
     }
 
     // ----------------- DOCUMENT PAR NIVEAU SERVICES

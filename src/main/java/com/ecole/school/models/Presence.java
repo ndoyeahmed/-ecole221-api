@@ -25,4 +25,8 @@ public class Presence {
     @ManyToOne
     @JoinColumn(name = "Jour", referencedColumnName = "id")
     private Jour jour;
+
+    @ManyToOne
+    @JoinColumn(name = "planificationCours", referencedColumnName = "id")
+    private PlanificationCours planificationCours;
 }
