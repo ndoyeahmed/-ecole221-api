@@ -20,6 +20,8 @@ import com.ecole.school.services.utils.Utils;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
 
+import com.ecole.school.web.exceptions.InternalServerErrorException;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Log
 @RestController
 @CrossOrigin
 @RequestMapping("/api/parametrage-classe/")
@@ -501,5 +504,25 @@ public class ParametrageClasseController {
         if (classe == null) throw new EntityNotFoundException("classe not found");
 
         return ResponseEntity.ok(parametrageClasseService.findAllClasseSousClasseByClasse(classe));
+    }
+
+    @GetMapping("classe-sous-classe/sousclasse/horaire/{horaireId}")
+    public ResponseEntity<?> getAllClasseSousClasseByArchiveFalseAndHoraireAndAnneeScolaireEncours(@PathVariable Long horaireId) {
+        try {
+            if (horaireId == null) throw new BadRequestException("horaireId required");
+
+            Horaire horaire = parametrageBaseService.findHoraireById(horaireId);
+            if (horaire == null) throw new BadRequestException("horaire not found");
+
+            AnneeScolaire anneeScolaire = parametrageBaseService.findAnneeScolaireEnCours();
+
+            List<ClasseSousClasse> classeSousClasses = parametrageClasseService
+                    .findAllClasseSousClasseByArchiveFalseAndHoraireAndAnneeScolaireEncours(horaireId, anneeScolaire.getId());
+
+            return ResponseEntity.ok(classeSousClasses);
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new InternalServerErrorException("Internal server error");
+        }
     }
 }

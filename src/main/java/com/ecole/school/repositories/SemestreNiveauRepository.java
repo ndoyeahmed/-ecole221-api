@@ -15,4 +15,6 @@ public interface SemestreNiveauRepository extends JpaRepository<SemestreNiveau, 
     Optional<List<SemestreNiveau>> findAllByNiveauAndArchiveFalse(Niveau niveau);
 
     Optional<SemestreNiveau> findBySemestreAndNiveauAndArchiveFalse(Semestre semestre, Niveau niveau);
+
+    Optional<SemestreNiveau> findByEnCoursTrueAndArchiveFalseAndNiveau(Niveau niveau);
 }

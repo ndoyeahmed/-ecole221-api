@@ -85,7 +85,7 @@ public class FilesController {
   public ResponseEntity<?> getImages(@RequestBody String filename) {
     try {
 
-      final InputStream inputStream = new FileInputStream(new File(filename));
+      final InputStream inputStream = new FileInputStream(filename);
       final byte[] bytes = IOUtils.toByteArray(inputStream);
       final String encodedImage = Base64.getEncoder().encodeToString(bytes);
 

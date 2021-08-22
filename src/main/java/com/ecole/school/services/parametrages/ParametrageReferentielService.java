@@ -3,17 +3,14 @@ package com.ecole.school.services.parametrages;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ecole.school.models.*;
 import com.ecole.school.models.Module;
-import com.ecole.school.models.Niveau;
-import com.ecole.school.models.ProgrammeModule;
-import com.ecole.school.models.ProgrammeUE;
-import com.ecole.school.models.Referentiel;
-import com.ecole.school.models.Semestre;
-import com.ecole.school.models.Specialite;
 import com.ecole.school.repositories.ProgrammeModuleRepository;
+import com.ecole.school.repositories.ProgrammeUEInscriptionRepository;
 import com.ecole.school.repositories.ProgrammeUERepository;
 import com.ecole.school.repositories.ReferentielRepository;
 
+import com.ecole.school.services.notes.NotesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,13 +24,15 @@ public class ParametrageReferentielService {
     private ReferentielRepository referentielRepository;
     private ProgrammeModuleRepository programmeModuleRepository;
     private ProgrammeUERepository programmeUERepository;
+    private ProgrammeUEInscriptionRepository programmeUEInscriptionRepository;
 
     @Autowired
-    public ParametrageReferentielService(ReferentielRepository referentielRepository,
+    public ParametrageReferentielService(ReferentielRepository referentielRepository, ProgrammeUEInscriptionRepository programmeUEInscriptionRepository,
             ProgrammeModuleRepository programmeModuleRepository, ProgrammeUERepository programmeUERepository) {
         this.referentielRepository = referentielRepository;
         this.programmeModuleRepository = programmeModuleRepository;
         this.programmeUERepository = programmeUERepository;
+        this.programmeUEInscriptionRepository = programmeUEInscriptionRepository;
     }
 
     // ----------------- REFERENTIEL SERVICES
@@ -110,6 +109,21 @@ public class ParametrageReferentielService {
 
     public List<ProgrammeUE> findAllProgrammeUEByReferentielAndSemestre(Referentiel referentiel, Semestre semestre) {
         return programmeUERepository.findAllByReferentielAndSemestreAndArchiveFalse(referentiel, semestre).orElse(new ArrayList<>());
+    }
+
+    // Programme UE Inscription
+    public ProgrammeUEInscription addProgrammeUEInscription(ProgrammeUEInscription programmeUEInscription) {
+        try {
+            programmeUEInscriptionRepository.save(programmeUEInscription);
+            return programmeUEInscription;
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw e;
+        }
+    }
+
+    public ProgrammeUEInscription findProgrammeUEInscriptionByProgrammeUEAndInscription(ProgrammeUE programmeUE, Inscription inscription) {
+        return programmeUEInscriptionRepository.findByProgrammeUEAndInscriptionAndArchiveFalse(programmeUE, inscription).orElse(null);
     }
 
     // ----------------- PROGRAMME_MODULE SERVICES

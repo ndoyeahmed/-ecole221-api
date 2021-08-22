@@ -19,8 +19,11 @@ public class Note {
     private Long id;
     private Timestamp dateSaisie;
     private Timestamp dateMAJ;
+    // moyenne des devoirs
     private double mds;
+    // note examen final
     private double nef;
+    // 0 = session normale; 1 = session remplacement;
     private int session;
 
     @ManyToOne

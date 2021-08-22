@@ -4,16 +4,9 @@ import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
+import com.ecole.school.models.*;
 import com.ecole.school.models.Module;
-import com.ecole.school.models.Niveau;
-import com.ecole.school.models.ProgrammeModule;
-import com.ecole.school.models.ProgrammeUE;
-import com.ecole.school.models.Referentiel;
-import com.ecole.school.models.Semestre;
-import com.ecole.school.models.Specialite;
-import com.ecole.school.services.parametrages.ParametrageModuleUEService;
-import com.ecole.school.services.parametrages.ParametrageReferentielService;
-import com.ecole.school.services.parametrages.ParametrageSpecialiteService;
+import com.ecole.school.services.parametrages.*;
 import com.ecole.school.services.utils.ExcelWriter;
 import com.ecole.school.services.utils.FileStorageService;
 import com.ecole.school.services.utils.Utils;
@@ -22,6 +15,7 @@ import com.ecole.school.web.POJO.ResponseMessage;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
 
+import com.ecole.school.web.exceptions.InternalServerErrorException;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,17 +32,21 @@ public class ParametrageReferentielController {
     private Utils utils;
     private ParametrageSpecialiteService parametrageSpecialiteService;
     private ParametrageModuleUEService parametrageModuleUEService;
+    private ParametrageClasseService parametrageClasseService;
+    private ParametrageBaseService parametrageBaseService;
     private ExcelWriter excelWriter;
 
     @Autowired
     public ParametrageReferentielController(ParametrageReferentielService parametrageReferentielService, Utils utils,
-            ParametrageSpecialiteService parametrageSpecialiteService, ExcelWriter excelWriter,
-            ParametrageModuleUEService parametrageModuleUEService) {
+            ParametrageSpecialiteService parametrageSpecialiteService, ExcelWriter excelWriter, ParametrageBaseService parametrageBaseService,
+            ParametrageModuleUEService parametrageModuleUEService, ParametrageClasseService parametrageClasseService) {
         this.utils = utils;
         this.parametrageReferentielService = parametrageReferentielService;
         this.parametrageSpecialiteService = parametrageSpecialiteService;
         this.parametrageModuleUEService = parametrageModuleUEService;
         this.excelWriter = excelWriter;
+        this.parametrageClasseService = parametrageClasseService;
+        this.parametrageBaseService = parametrageBaseService;
     }
 
     // ----------------- REFERENTIEL ENDPOINTS
@@ -514,5 +512,31 @@ public class ParametrageReferentielController {
 
         return ResponseEntity.ok(parametrageReferentielService
                 .findAllProgrammeModuleByReferentielAndSemestre(referentiel, semestre));
+    }
+
+    @GetMapping("programme-module/classe/{classeId}/semestre/{semestreId}")
+    public ResponseEntity<?> getListProgrammeModuleByClasseAndSemestreAndAnneeScolaire(@PathVariable Long classeId, @PathVariable Long semestreId) {
+        try {
+            if (classeId == null) throw new BadRequestException("classeId required");
+            if (semestreId == null) throw new BadRequestException("semestreId required");
+
+            Classe classe = parametrageClasseService.findClasseById(classeId);
+            if (classe == null) throw new BadRequestException("classe not found");
+
+            Semestre semestre = parametrageSpecialiteService.findSemestreById(semestreId);
+            if (semestre == null) throw new BadRequestException("semestre not found");
+
+            AnneeScolaire anneeScolaire = parametrageBaseService.findAnneeScolaireEnCours();
+            ClasseReferentiel classeReferentiel = parametrageClasseService.findClasseReferentielByClasseAndAnneeScolaire(classe, anneeScolaire);
+            if (classeReferentiel == null) throw new BadRequestException("classe not affected to a referentiel");
+
+            List<ProgrammeModule> programmeModules = parametrageReferentielService
+                    .findAllProgrammeModuleByReferentielAndSemestre(classeReferentiel.getReferentiel(), semestre);
+
+            return ResponseEntity.ok(programmeModules);
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new InternalServerErrorException("Internal Server error");
+        }
     }
 }

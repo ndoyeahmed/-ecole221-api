@@ -160,6 +160,10 @@ public class ParametrageClasseService {
         return classeReferentielRepository.findByClasseAndReferentielAndArchiveFalse(classe, referentiel).orElse(null);
     }
 
+    public ClasseReferentiel findClasseReferentielByClasseAndAnneeScolaire(Classe classe, AnneeScolaire anneeScolaire) {
+        return classeReferentielRepository.findByClasseAndAnneeScolaireAndArchiveFalse(classe, anneeScolaire).orElse(null);
+    }
+
     public ClasseReferentiel hasClasseAffected(Niveau niveau, Specialite specialite, Horaire horaire) {
         Classe classe = classeRepository.findByNiveauAndSpecialiteAndHoraireAndArchiveFalse(niveau, specialite, horaire)
         .orElse(null);
@@ -200,5 +204,9 @@ public class ParametrageClasseService {
 
     public List<ClasseSousClasse> findAllClasseSousClasseBySousClasse(SousClasse sousClasse) {
         return classeSousClasseRepository.findAllBySousClasseAndArchiveFalse(sousClasse).orElse(new ArrayList<>());
+    }
+
+    public List<ClasseSousClasse> findAllClasseSousClasseByArchiveFalseAndHoraireAndAnneeScolaireEncours(Long horaireId, Long anneeScoalireId) {
+        return classeSousClasseRepository.findAllByArchiveFalseAndHoraireAndAnneeScolaireEncours(horaireId, anneeScoalireId).orElse(new ArrayList<>());
     }
 }

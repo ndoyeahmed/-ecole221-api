@@ -20,6 +20,7 @@ import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
 import com.ecole.school.web.exceptions.InternalServerErrorException;
 
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Log
 @RestController
 @CrossOrigin
 @RequestMapping("/api/parametrage-specialite/")
@@ -343,6 +345,21 @@ public class ParametrageSpecialiteController {
 
         semestreNiveau.setArchive(true);
         return ResponseEntity.ok(parametrageSpecialiteService.addSemestreNiveau(semestreNiveau));
+    }
+
+    @GetMapping("semestre-niveau/encours/niveau/{niveau}")
+    public ResponseEntity<?> getSemestreNiveauEncoursByNiveau(@PathVariable Long niveau) {
+        try {
+            if (niveau == null) throw new BadRequestException("niveau required");
+
+            Niveau niveau1 = parametrageSpecialiteService.findNiveauById(niveau);
+            if (niveau1 == null) throw new BadRequestException("niveau not found");
+
+            return ResponseEntity.ok(parametrageSpecialiteService.findSemestreNiveauEncoursByNiveau(niveau1));
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new InternalServerErrorException("Internal server error");
+        }
     }
 
     // ----------------- SPECIALITE ENDPOINTS

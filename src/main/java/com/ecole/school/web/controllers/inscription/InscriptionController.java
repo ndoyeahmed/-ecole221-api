@@ -12,21 +12,11 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
-import com.ecole.school.models.AnneeScolaire;
-import com.ecole.school.models.ClasseReferentiel;
-import com.ecole.school.models.Document;
-import com.ecole.school.models.DocumentParEtudiant;
-import com.ecole.school.models.Etudiant;
-import com.ecole.school.models.EtudiantTuteur;
-import com.ecole.school.models.Inscription;
-import com.ecole.school.models.NoteProgrammeModule;
-import com.ecole.school.models.Profil;
-import com.ecole.school.models.ProgrammeModule;
-import com.ecole.school.models.ProgrammeUE;
-import com.ecole.school.models.Utilisateur;
+import com.ecole.school.models.*;
 import com.ecole.school.services.inscription.InscriptionService;
-import com.ecole.school.services.inscription.NoteService;
+import com.ecole.school.services.notes.NotesService;
 import com.ecole.school.services.parametrages.ParametrageBaseService;
 import com.ecole.school.services.parametrages.ParametrageClasseService;
 import com.ecole.school.services.parametrages.ParametrageReferentielService;
@@ -39,12 +29,14 @@ import com.ecole.school.web.POJO.InscriptionPOJO;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
 
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,6 +46,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Log
 @RestController
 @CrossOrigin
 @RequestMapping("/api/inscription/")
@@ -64,14 +57,14 @@ public class InscriptionController {
     private UtilisateurService utilisateurService;
     private ParametrageClasseService parametrageClasseService;
     private ParametrageReferentielService parametrageReferentielService;
-    private NoteService noteService;
+    private NotesService noteService;
     private Utils utils;
     private FileStorageService storageService;
 
     @Autowired
     public InscriptionController(InscriptionService inscriptionService, ParametrageBaseService ParametrageBaseService,
             UtilisateurService utilisateurService, Utils utils, ParametrageClasseService parametrageClasseService,
-            ParametrageReferentielService parametrageReferentielService, NoteService noteService,
+            ParametrageReferentielService parametrageReferentielService, NotesService noteService,
             FileStorageService storageService) {
 
         this.inscriptionService = inscriptionService;
@@ -105,7 +98,7 @@ public class InscriptionController {
     // -------------Inscription ENDPOINTS
     @PostMapping("inscription")
     public ResponseEntity<?> inscription(@RequestBody InscriptionPOJO inscriptionPOJO)
-            throws FileNotFoundException, IOException {
+            throws FileNotFoundException, IOException, InterruptedException {
         if (inscriptionPOJO == null)
             throw new BadRequestException("body required");
         if (inscriptionPOJO.getEtudiant() == null || inscriptionPOJO.getEtudiant().getCin() == null)
@@ -267,12 +260,40 @@ public class InscriptionController {
         inscription = inscriptionService.addInscription(inscription);
         // end bloc to add inscription
 
+        // set default note if classe affected to a referentiel
+        setDefaultNoteForNewInscription(inscription);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(inscription);
+    }
+
+    @Async("asyncExecutor")
+    public CompletableFuture<List<NoteProgrammeModule>> setDefaultNoteForNewInscription(Inscription inscription) throws InterruptedException {
+        List<NoteProgrammeModule> noteProgrammeModules = new ArrayList<>();
+        List<ClasseSousClasse> classeSousClasses = parametrageClasseService
+                .findAllClasseSousClasseBySousClasse(inscription.getSousClasse());
+        Classe classe = null;
+        if (classeSousClasses.size() > 0) {
+            classe = classeSousClasses.get(0).getClasse();
+            AnneeScolaire anneeScolaire = parametrageBaseService.findAnneeScolaireEnCours();
+            ClasseReferentiel classeReferentiel = parametrageClasseService.findClasseReferentielByClasseAndAnneeScolaire(classe, anneeScolaire);
+            if (classeReferentiel != null) {
+                List<ProgrammeModule> programmeModules = parametrageReferentielService
+                        .findAllProgrammeModuleByReferentiel(classeReferentiel.getReferentiel());
+                if (programmeModules.size() > 0) {
+                    noteProgrammeModules = noteService.setDefaultNote(programmeModules, inscription);
+                    log.info("note modules size --> " + noteProgrammeModules.size());
+                    noteService
+                            .addListProgrammeUeInscriptionByReferentielAndInscription(classeReferentiel.getReferentiel(), inscription);
+                }
+            }
+        }
+
+        return CompletableFuture.completedFuture(noteProgrammeModules);
     }
 
     @GetMapping("inscription/annee/{idAnneeScolaire}")
     public ResponseEntity<?> getAllInscription(@PathVariable Long idAnneeScolaire) {
-        if (idAnneeScolaire == null) throw new BadRequestException("id annee scolaire requied");
+        if (idAnneeScolaire == null) throw new BadRequestException("id annee scolaire required");
 
         AnneeScolaire anneeScolaire = parametrageBaseService.findAnneeScolaireById(idAnneeScolaire);
 

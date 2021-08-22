@@ -148,6 +148,10 @@ public class ParametrageSpecialiteService {
         return semestreNiveauRepository.findById(id).orElse(null);
     }
 
+    public SemestreNiveau findSemestreNiveauEncoursByNiveau(Niveau niveau) {
+        return semestreNiveauRepository.findByEnCoursTrueAndArchiveFalseAndNiveau(niveau).orElse(null);
+    }
+
     public void setAllSemestreNiveauEnCoursFalseByNiveau(Niveau niveau) {
         List<SemestreNiveau> list = findAllSemestreNiveauByNiveau(niveau);
 
