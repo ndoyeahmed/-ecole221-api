@@ -7,6 +7,9 @@ import com.ecole.school.services.parametrages.ParametrageBaseService;
 import com.ecole.school.services.parametrages.ParametrageClasseService;
 import com.ecole.school.services.parametrages.ParametrageReferentielService;
 import com.ecole.school.services.parametrages.ParametrageSpecialiteService;
+import com.ecole.school.web.POJO.BulletinInscription;
+import com.ecole.school.web.POJO.BulletinRecap;
+import com.ecole.school.web.POJO.RecapNoteProgrammeModuleByProgrammeUE;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.InternalServerErrorException;
 import lombok.extern.java.Log;
@@ -17,7 +20,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Log
 @RestController
@@ -77,16 +82,60 @@ public class NotesController {
     }
 
     @GetMapping("note-programme-module/inscription/{inscriptionId}")
-    public ResponseEntity<?> getAllNoteProgrammeModuleByInsAnneeRefSemestre(@PathVariable Long inscriptionId) {
+    public ResponseEntity<?> getAllNoteProgrammeModuleByInscription(@PathVariable Long inscriptionId) {
+        try {
+            List<NoteProgrammeModule> noteProgrammeModules = getAllNoteProgrammeModuleByInscriptionId(inscriptionId);
+
+            return ResponseEntity.ok(noteProgrammeModules);
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new InternalServerErrorException("Internal Server error");
+        }
+    }
+
+    private List<NoteProgrammeModule> getAllNoteProgrammeModuleByInscriptionId(Long inscriptionId) {
+        if (inscriptionId == null) throw new BadRequestException("inscriptionId required");
+
+        Inscription inscription = inscriptionService.findInscriptionById(inscriptionId);
+        if (inscription == null) throw new BadRequestException("inscription not found");
+
+        List<ClasseSousClasse> classeSousClasseList = parametrageClasseService.findAllClasseSousClasseBySousClasse(inscription.getSousClasse());
+        if (classeSousClasseList.size() <= 0) throw new BadRequestException("classesousclasse not found");
+        Classe classe = classeSousClasseList.get(0).getClasse();
+        SemestreNiveau semestreNiveau = parametrageSpecialiteService.findSemestreNiveauEncoursByNiveau(inscription.getSousClasse().getNiveau());
+        if (semestreNiveau == null) throw new BadRequestException("semestre note found");
+        Semestre semestre = semestreNiveau.getSemestre();
+        AnneeScolaire anneeScolaire = inscription.getAnneeScolaire();
+        ClasseReferentiel classeReferentiel = parametrageClasseService.findClasseReferentielByClasseAndAnneeScolaire(classe, anneeScolaire);
+        if (classeReferentiel == null) throw new BadRequestException("classe not affected to a referentiel");
+
+        return notesService.findAllNoteProgrammeModuleByInsAnneeRefSemestre(
+          inscription, anneeScolaire, classeReferentiel.getReferentiel(), semestre);
+    }
+
+    @GetMapping("note-programme-module/inscription/{inscriptionId}/classe/{classeId}/semestre/{semestreId}")
+    public ResponseEntity<?> getAllNoteProgrammeModuleByInsAnneeRefSemestre(@PathVariable Long inscriptionId,
+                                                                           @PathVariable Long classeId, @PathVariable Long semestreId) {
         try {
             if (inscriptionId == null) throw new BadRequestException("inscriptionId required");
+            if (classeId == null) throw new BadRequestException("classeId required");
+            if (semestreId == null) throw new BadRequestException("semestreId required");
 
             Inscription inscription = inscriptionService.findInscriptionById(inscriptionId);
             if (inscription == null) throw new BadRequestException("inscription not found");
+            Classe classe = parametrageClasseService.findClasseById(classeId);
+            if (classe == null) throw new BadRequestException("classe not found");
+
+            Semestre semestre = parametrageSpecialiteService.findSemestreById(semestreId);
+            if (semestre == null) throw new BadRequestException("semestre not found");
+
+            AnneeScolaire anneeScolaire = inscription.getAnneeScolaire();
+            ClasseReferentiel classeReferentiel = parametrageClasseService.findClasseReferentielByClasseAndAnneeScolaire(classe, anneeScolaire);
+            if (classeReferentiel == null) throw new BadRequestException("classe not affected to a referentiel");
 
 
-
-            List<NoteProgrammeModule> noteProgrammeModules = notesService.findAllNoteProgrammeModuleByInscription(inscription);
+            List<NoteProgrammeModule> noteProgrammeModules = notesService.findAllNoteProgrammeModuleByInsAnneeRefSemestre(
+              inscription, anneeScolaire, classeReferentiel.getReferentiel(), semestre);
 
             return ResponseEntity.ok(noteProgrammeModules);
         } catch (Exception e) {
@@ -189,4 +238,136 @@ public class NotesController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(note);
     }
+
+    // ------------------------------- bulletin etudiant ---------------------------------------------------------
+
+    @GetMapping("bulletin/classe/{idClasse}")
+    public ResponseEntity<?> getAllInfosBulletinByClasse(@PathVariable Long idClasse) {
+        if (idClasse == null) throw new BadRequestException("idInscription required");
+
+        Classe classe = parametrageClasseService.findClasseById(idClasse);
+        if (classe == null) throw new BadRequestException("incorrect idClasse");
+
+        return ResponseEntity.ok("sd");
+    }
+
+    @GetMapping("bulletin/inscription/{idInscription}")
+    public ResponseEntity<?> getAllInfosBulletinByInscription(@PathVariable Long idInscription) {
+
+        try {
+            if (idInscription == null) throw new BadRequestException("idInscription required");
+            Inscription inscription = inscriptionService.findInscriptionById(idInscription);
+            if (inscription == null) throw new BadRequestException("idInscription incorrect");
+            List<NoteProgrammeModule> noteProgrammeModules = getAllNoteProgrammeModuleByInscriptionId(idInscription);
+            List<RecapNoteProgrammeModuleByProgrammeUE> recapNoteProgrammeModuleByProgrammeUES = groupeNoteProgrammeModuleByProgrammeUe(noteProgrammeModules);
+            recapNoteProgrammeModuleByProgrammeUES.forEach(recapNoteProgrammeModuleByProgrammeUE -> {
+                recapNoteProgrammeModuleByProgrammeUE = notesService.getMoyenneUEByRecapNoteProgrammeModule(recapNoteProgrammeModuleByProgrammeUE);
+                notesService.checkAndSetValideProgrammeUE(inscription, recapNoteProgrammeModuleByProgrammeUE.getProgrammeUE(),
+                  recapNoteProgrammeModuleByProgrammeUE.getMoyenneUE());
+            });
+            Double sommeMoyenneUE = recapNoteProgrammeModuleByProgrammeUES.stream().mapToDouble(recap -> recap.getMoyenneUE()*recap.getProgrammeUE().getCredit()).sum();
+            Integer sommeCreditUE = recapNoteProgrammeModuleByProgrammeUES.stream().mapToInt(recap -> recap.getProgrammeUE().getCredit()).sum();
+            Double moyenneGeneral = sommeMoyenneUE / sommeCreditUE;
+            BulletinInscription bulletinInscription = new BulletinInscription(recapNoteProgrammeModuleByProgrammeUES, moyenneGeneral);
+            return ResponseEntity.ok(bulletinInscription);
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new InternalServerErrorException("Internal server error");
+        }
+    }
+
+    @GetMapping("bulletin-recap/inscription/{idInscription}")
+    public ResponseEntity<?> getRecapBulletinByInscription(@PathVariable Long idInscription) {
+
+        try {
+            if (idInscription == null) throw new BadRequestException("idInscription required");
+            Inscription inscription = inscriptionService.findInscriptionById(idInscription);
+            if (inscription == null) throw new BadRequestException("idInscription incorrect");
+            List<Semestre> semestres = parametrageSpecialiteService.findAllSemestre();
+            List<BulletinRecap> bulletinRecaps = new ArrayList<>();
+            semestres.forEach(semestre -> {
+                BulletinRecap bulletinRecap = new BulletinRecap();
+                bulletinRecap.setSemestre(semestre);
+                Integer totalCreditSemestre = notesService.getSommeCreditProgrammeUeBySemestre(semestre, inscription);
+                Integer totalCreditSemestreValide = notesService.getSommeCreditProgrammeUeNonValideBySemestre(semestre, inscription);
+                bulletinRecap.setValide(totalCreditSemestreValide != null && totalCreditSemestre!= null && totalCreditSemestreValide >= totalCreditSemestre);
+                bulletinRecap.setTotalCredit(totalCreditSemestreValide != null ? totalCreditSemestreValide : 0);
+                bulletinRecaps.add(bulletinRecap);
+            });
+            return ResponseEntity.ok(bulletinRecaps);
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new InternalServerErrorException("Internal server error");
+        }
+    }
+
+    @GetMapping("bulletin/programmeue-inscription/inscription/{idInscription}")
+    public ResponseEntity<?> getAllProgrammeUeInscriptionByInscription(@PathVariable Long idInscription) {
+
+        try {
+            if (idInscription == null) throw new BadRequestException("idInscription required");
+            Inscription inscription = inscriptionService.findInscriptionById(idInscription);
+            if (inscription == null) throw new BadRequestException("idInscription incorrect");
+
+            return ResponseEntity.ok(notesService.findAllProgrammeUEInscriptionByInscription(inscription));
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new InternalServerErrorException("Internal server error");
+        }
+    }
+
+    @GetMapping("bulletin/recap-semestre-inscription/semestre/{idSemestre}/inscription/{idInscription}")
+    public ResponseEntity<?> getAllRecapSemestreInscriptionValide(@PathVariable Long idSemestre, @PathVariable Long idInscription) {
+
+        try {
+            if (idInscription == null) throw new BadRequestException("idInscription required");
+            if (idSemestre == null) throw new BadRequestException("idSemestre required");
+            Inscription inscription = inscriptionService.findInscriptionById(idInscription);
+            if (inscription == null) throw new BadRequestException("idInscription incorrect");
+
+            Semestre semestre = parametrageSpecialiteService.findSemestreById(idSemestre);
+            if (semestre == null) throw new BadRequestException("idSemestre incorrect");
+
+            return ResponseEntity.ok(notesService.findAllProgrammeUEInscriptionByInscription(inscription));
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new InternalServerErrorException("Internal server error");
+        }
+    }
+
+    private List<RecapNoteProgrammeModuleByProgrammeUE> groupeNoteProgrammeModuleByProgrammeUe(List<NoteProgrammeModule> noteProgrammeModules) {
+        List<RecapNoteProgrammeModuleByProgrammeUE> recapNoteProgrammeModuleByProgrammeUES = new ArrayList<>();
+        List<ProgrammeUE> programmeUES = new ArrayList<>();
+
+        for (int i = 0; i < noteProgrammeModules.size(); i++) {
+            boolean trouve = false;
+            for (int j = 0; j < i; j++) {
+                if (Objects.equals(noteProgrammeModules.get(i).getProgrammeModule().getProgrammeUE().getId(),
+                  noteProgrammeModules.get(j).getProgrammeModule().getProgrammeUE().getId())) {
+                    trouve = true;
+                    break;
+                }
+            }
+
+            if (!trouve) {
+                programmeUES.add(noteProgrammeModules.get(i).getProgrammeModule().getProgrammeUE());
+            }
+        }
+
+        programmeUES.forEach(programmeUE -> {
+            List<NoteProgrammeModule> programmeModules = new ArrayList<>();
+            noteProgrammeModules.forEach(noteProgrammeModule -> {
+                if (Objects.equals(noteProgrammeModule.getProgrammeModule().getProgrammeUE().getId(), programmeUE.getId())) {
+                    programmeModules.add(noteProgrammeModule);
+                }
+            });
+            RecapNoteProgrammeModuleByProgrammeUE recapNoteProgrammeModuleByProgrammeUE = new RecapNoteProgrammeModuleByProgrammeUE();
+            recapNoteProgrammeModuleByProgrammeUE.setNoteProgrammeModules(programmeModules);
+            recapNoteProgrammeModuleByProgrammeUE.setProgrammeUE(programmeUE);
+            recapNoteProgrammeModuleByProgrammeUES.add(recapNoteProgrammeModuleByProgrammeUE);
+        });
+
+        return recapNoteProgrammeModuleByProgrammeUES;
+    }
+
 }

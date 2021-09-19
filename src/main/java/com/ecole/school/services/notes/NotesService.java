@@ -1,16 +1,18 @@
 package com.ecole.school.services.notes;
 
 import com.ecole.school.models.*;
-import com.ecole.school.repositories.DevoirRepository;
-import com.ecole.school.repositories.NoteProgrammeModuleRepository;
-import com.ecole.school.repositories.NoteRepository;
+import com.ecole.school.repositories.*;
 import com.ecole.school.services.parametrages.ParametrageReferentielService;
+import com.ecole.school.web.POJO.RecapNoteProgrammeModuleByProgrammeUE;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,15 +25,20 @@ public class NotesService {
     private NoteProgrammeModuleRepository noteProgrammeModuleRepository;
     private NoteRepository noteRepository;
     private DevoirRepository devoirRepository;
+    private ProgrammeUEInscriptionRepository programmeUEInscriptionRepository;
+    private RecapSemestreInscriptionValideRepository recapSemestreInscriptionValideRepository;
     private ParametrageReferentielService parametrageReferentielService;
 
     @Autowired
     public NotesService(NoteProgrammeModuleRepository noteProgrammeModuleRepository, DevoirRepository devoirRepository,
-                        NoteRepository noteRepository, ParametrageReferentielService parametrageReferentielService) {
+      RecapSemestreInscriptionValideRepository recapSemestreInscriptionValideRepository,
+                        NoteRepository noteRepository, ParametrageReferentielService parametrageReferentielService, ProgrammeUEInscriptionRepository programmeUEInscriptionRepository) {
         this.noteProgrammeModuleRepository = noteProgrammeModuleRepository;
         this.noteRepository = noteRepository;
         this.parametrageReferentielService = parametrageReferentielService;
         this.devoirRepository = devoirRepository;
+        this.programmeUEInscriptionRepository = programmeUEInscriptionRepository;
+        this.recapSemestreInscriptionValideRepository = recapSemestreInscriptionValideRepository;
     }
 
     // ----------------------- Devoirs --------------------------------------
@@ -144,6 +151,56 @@ public class NotesService {
         return noteRepository.findAllByInscription_AnneeScolaireAndInscription_ArchiveFalse(anneeScolaire).orElse(new ArrayList<>());
     }
 
+    // --------------------------- programme ue inscription ---------------------------------
+    public ProgrammeUEInscription addProgrammeUEInscription(ProgrammeUEInscription programmeUEInscription) {
+        try {
+            programmeUEInscriptionRepository.save(programmeUEInscription);
+            return programmeUEInscription;
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw e;
+        }
+    }
+
+    public ProgrammeUEInscription findProgrammeUEInscriptionByProgrammeUEAndInscription(ProgrammeUE programmeUE, Inscription inscription) {
+        return programmeUEInscriptionRepository.findByProgrammeUEAndInscriptionAndArchiveFalse(programmeUE, inscription).orElse(null);
+    }
+
+    public List<ProgrammeUEInscription> findAllProgrammeUEInscriptionByInscription(Inscription inscription) {
+        return programmeUEInscriptionRepository.findAllByArchiveFalseAndInscription(inscription).orElse(new ArrayList<>());
+    }
+
+    public Integer getSommeCreditProgrammeUeNonValideBySemestre(Semestre semestre, Inscription inscription) {
+        return programmeUEInscriptionRepository.findSumCreditPrgrammeUeNonValideBySemestre(semestre, inscription);
+    }
+
+    public Integer getSommeCreditProgrammeUeBySemestre(Semestre semestre, Inscription inscription) {
+        return programmeUEInscriptionRepository.findSumCreditPrgrammeUeBySemestre(semestre, inscription);
+    }
+
+    // ------------------------------ recap semestre inscription valide -----------------------------------------------
+    public List<RecapSemestreInscriptionValide> findAllRecapSemestreInscriptionValideByInscription(Inscription inscription) {
+        return recapSemestreInscriptionValideRepository.findAllByInscription(inscription).orElse(new ArrayList<>());
+    }
+
+    public RecapSemestreInscriptionValide addRecapSemestreInscriptionValide(RecapSemestreInscriptionValide recapSemestreInscriptionValide) {
+        try {
+            recapSemestreInscriptionValideRepository.save(recapSemestreInscriptionValide);
+            return recapSemestreInscriptionValide;
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw e;
+        }
+    }
+
+    public RecapSemestreInscriptionValide findRecapSemestreInscriptionValideById(Long id) {
+        return recapSemestreInscriptionValideRepository.findById(id).orElse(null);
+    }
+
+    public RecapSemestreInscriptionValide findRecapSemestreInscriptionValideBySemestreAndInscription(Semestre semestre, Inscription inscription) {
+        return recapSemestreInscriptionValideRepository.findBySemestreAndInscription(semestre, inscription).orElse(null);
+    }
+
     // ------------------ utils -----------------------------
     public List<NoteProgrammeModule> regulariseNote(List<List<ProgrammeModule>> pList, Inscription inscription) {
         List<NoteProgrammeModule> noteProgrammeModules = new ArrayList<>();
@@ -192,6 +249,26 @@ public class NotesService {
         return noteProgrammeModules;
     }
 
+
+
+    public ProgrammeUEInscription checkAndSetValideProgrammeUE(Inscription inscription, ProgrammeUE programmeUE, double moyenneUE) {
+        ProgrammeUEInscription programmeUEInscription = findProgrammeUEInscriptionByProgrammeUEAndInscription(programmeUE, inscription);
+        if (programmeUEInscription == null) {
+            programmeUEInscription = new ProgrammeUEInscription();
+            programmeUEInscription.setProgrammeUE(programmeUE);
+            programmeUEInscription.setInscription(inscription);
+            programmeUEInscription.setArchive(false);
+        }
+
+        programmeUEInscription.setValide(moyenneUE >= 10);
+
+        addProgrammeUEInscription(programmeUEInscription);
+
+        return programmeUEInscription;
+    }
+
+
+
     public boolean checkValidateProgrammeUe(ProgrammeUE programmeUE, Inscription inscription) {
         List<ProgrammeModule> programmeModules = parametrageReferentielService.findAllProgrammeModuleByProgrammeUE(programmeUE.getId());
         if (programmeModules.size() > 0) {
@@ -205,6 +282,21 @@ public class NotesService {
             return sommeMoyenneModule / programmeModules.size() > 10;
         }
         return false;
+    }
+
+    public RecapNoteProgrammeModuleByProgrammeUE getMoyenneUEByRecapNoteProgrammeModule(RecapNoteProgrammeModuleByProgrammeUE recapNoteProgrammeModuleByProgrammeUE) {
+      double sommeCoef = recapNoteProgrammeModuleByProgrammeUE.getNoteProgrammeModules().stream()
+        .mapToDouble(noteProgrammeModule -> noteProgrammeModule.getProgrammeModule().getCoef()).sum();
+
+      double sommeMoyenneProgrammeModule = recapNoteProgrammeModuleByProgrammeUE.getNoteProgrammeModules().stream().mapToDouble(
+        noteProgrammeModule -> (getMoyenneProgrammeModule(noteProgrammeModule) *
+                                noteProgrammeModule.getProgrammeModule().getCoef())).sum();
+      double moyenneUe = sommeMoyenneProgrammeModule/sommeCoef;
+        BigDecimal bd = new BigDecimal(Double.toString(moyenneUe));
+        moyenneUe = bd.setScale(2, RoundingMode.HALF_UP).doubleValue();
+      recapNoteProgrammeModuleByProgrammeUE.setMoyenneUE(moyenneUe);
+
+      return recapNoteProgrammeModuleByProgrammeUE;
     }
 
     public Double getMoyenneUE(ProgrammeUE programmeUE, Inscription inscription) {
