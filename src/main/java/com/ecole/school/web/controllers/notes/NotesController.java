@@ -18,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -268,6 +270,7 @@ public class NotesController {
             Double sommeMoyenneUE = recapNoteProgrammeModuleByProgrammeUES.stream().mapToDouble(recap -> recap.getMoyenneUE()*recap.getProgrammeUE().getCredit()).sum();
             Integer sommeCreditUE = recapNoteProgrammeModuleByProgrammeUES.stream().mapToInt(recap -> recap.getProgrammeUE().getCredit()).sum();
             Double moyenneGeneral = sommeMoyenneUE / sommeCreditUE;
+            moyenneGeneral = notesService.formateFloatNumber(moyenneGeneral);
             BulletinInscription bulletinInscription = new BulletinInscription(recapNoteProgrammeModuleByProgrammeUES, moyenneGeneral);
             return ResponseEntity.ok(bulletinInscription);
         } catch (Exception e) {

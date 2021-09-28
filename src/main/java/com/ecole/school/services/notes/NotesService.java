@@ -292,11 +292,15 @@ public class NotesService {
         noteProgrammeModule -> (getMoyenneProgrammeModule(noteProgrammeModule) *
                                 noteProgrammeModule.getProgrammeModule().getCoef())).sum();
       double moyenneUe = sommeMoyenneProgrammeModule/sommeCoef;
-        BigDecimal bd = new BigDecimal(Double.toString(moyenneUe));
-        moyenneUe = bd.setScale(2, RoundingMode.HALF_UP).doubleValue();
+        moyenneUe = formateFloatNumber(moyenneUe);
       recapNoteProgrammeModuleByProgrammeUE.setMoyenneUE(moyenneUe);
 
       return recapNoteProgrammeModuleByProgrammeUE;
+    }
+
+    public Double formateFloatNumber(Double number) {
+        BigDecimal bd = new BigDecimal(Double.toString(number));
+        return bd.setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
     public Double getMoyenneUE(ProgrammeUE programmeUE, Inscription inscription) {
