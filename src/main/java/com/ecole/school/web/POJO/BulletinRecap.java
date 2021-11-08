@@ -7,5 +7,6 @@ import lombok.Data;
 public class BulletinRecap {
   private Semestre semestre;
   private boolean valide;
-  private int totalCredit;
+  private Integer totalCredit;
+  private Integer totalCreditSemestre;
 }

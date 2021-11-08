@@ -76,6 +76,10 @@ public class InscriptionService {
         return inscriptionRepository.findById(id).orElse(null);
     }
 
+    public Inscription findInscriptionByEtudiantAnneeSpecialiteNiveau(Long etudiantId, Long anneeId, Long specialiteId, Long niveauId) {
+        return inscriptionRepository.findByEtudiantAndAnneeAndSpecialiteAndNiveau(etudiantId, anneeId, specialiteId, niveauId).orElse(null);
+    }
+
     public List<Inscription> findAllInscriptionByAnneeScolaire(AnneeScolaire anneeScolaire) {
         return inscriptionRepository.findAllByAnneeScolaireAndArchiveFalse(anneeScolaire).orElse(new ArrayList<>());
     }

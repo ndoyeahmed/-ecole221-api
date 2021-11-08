@@ -166,12 +166,12 @@ public class InscriptionController {
             etudiantUser.setLogin(etudiant.getEmail());
             etudiantUser.setPassword(utils.encodePassword(utils.generatePassword()));
             etudiantUser = utilisateurService.addUser(etudiantUser);
-            utilisateurService.email(etudiantUser, etudiantUser.getPassword());
+            //utilisateurService.email(etudiantUser, etudiantUser.getPassword());
             // end bloc to add etudiant
 
             // bloc to add Parent
             Utilisateur mere = inscriptionPOJO.getMere();
-            if (mere != null && mere.getCin() != null) {
+            if (mere != null && mere.getNom() != null && mere.getPrenom() != null && mere.getTelephone() != null) {
                 Profil profilMere = utilisateurService.findProfilByLibelle("MERE");
                 mere.setProfil(profilMere);
                 mere.setArchive(false);
@@ -184,7 +184,7 @@ public class InscriptionController {
                 inscriptionService.addEtudiantTuteur(etudiantTuteur);
             }
             Utilisateur pere = inscriptionPOJO.getPere();
-            if (pere != null && pere.getCin() != null) {
+            if (pere != null && pere.getNom() != null && pere.getPrenom() != null && pere.getTelephone() != null) {
                 Profil profilPere = utilisateurService.findProfilByLibelle("PERE");
                 pere.setProfil(profilPere);
                 pere.setArchive(false);
@@ -197,7 +197,7 @@ public class InscriptionController {
                 inscriptionService.addEtudiantTuteur(etudiantTuteur);
             }
             Utilisateur tuteur = inscriptionPOJO.getTuteur();
-            if (tuteur != null && tuteur.getCin() != null) {
+            if (tuteur != null && tuteur.getNom() != null && tuteur.getPrenom() != null && tuteur.getTelephone() != null) {
                 Profil profilTuteur = utilisateurService.findProfilByLibelle("TUTEUR");
                 tuteur.setProfil(profilTuteur);
                 tuteur.setArchive(false);
@@ -210,6 +210,26 @@ public class InscriptionController {
                 inscriptionService.addEtudiantTuteur(etudiantTuteur);
             }
             // end bloc to add Parent
+        }
+
+        if (etudiant.getId() != null) {
+            Etudiant student = inscriptionService.findEtudiantById(etudiant.getId());
+            if (student != null) {
+                if (student.getMatricule() == null) {
+                    student.setMatricule(
+                      utils.genereMatriculeEtudiant(inscriptionPOJO.getSousClasse().getSpecialite().getNum(),
+                        anneeScolaire.getAnnee() + "", inscriptionService.findAllEtudiant()));
+                    inscriptionService.addEtudiant(student);
+                }
+                SousClasse sousClasse = parametrageClasseService.findSousClasseById(inscriptionPOJO.getSousClasse().getId());
+                if (sousClasse == null) throw new BadRequestException("sous classe not found");
+                Inscription inscription = inscriptionService.findInscriptionByEtudiantAnneeSpecialiteNiveau(student.getId(),
+                  anneeScolaire.getId(),
+                  sousClasse.getSpecialite().getId(),
+                  sousClasse.getNiveau().getId());
+                if (inscription != null) throw new BadRequestException("deja inscrit dans cette filiere");
+                etudiant = student;
+            }
         }
 
         // bloc to add document par Etudiant

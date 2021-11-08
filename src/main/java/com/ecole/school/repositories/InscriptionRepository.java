@@ -18,6 +18,11 @@ public interface InscriptionRepository extends JpaRepository<Inscription, Long> 
     @Query("select i from Inscription i where i.archive=false and i.etudiant.id=:idEtudiant")
     Optional<List<Inscription>> findAllByEtudiantAndArchiveFalse(@Param("idEtudiant") Long idEtudiant);
 
+    @Query("select i from Inscription i where i.archive=false and i.etudiant.id=:idEtudiant and i.anneeScolaire.id=:annee " +
+           "and i.sousClasse.specialite.id=:specialite and i.sousClasse.niveau.id=:niveau")
+    Optional<Inscription> findByEtudiantAndAnneeAndSpecialiteAndNiveau(@Param("idEtudiant") Long idEtudiant, @Param("annee") Long annee,
+      @Param("specialite") Long specialite, @Param("niveau") Long niveau);
+
     @Query("select i from Inscription i where i.archive=false and i.anneeScolaire=:anneeScolaire and" +
             " i.id in (select npm.note.inscription.id from NoteProgrammeModule npm)")
     Optional<List<Inscription>> findAllByAnneeScolaireAndArchiveFalseAndHaveNote(@Param("anneeScolaire") AnneeScolaire anneeScolaire);

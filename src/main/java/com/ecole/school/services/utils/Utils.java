@@ -84,24 +84,8 @@ public class Utils {
   }
 
   // generate code UE by niveau, semestre num and ue order num
-  public String generateUECode(String ue, int niveau, int semestreNum, int ueOrderNum) {
-    String[] content;
-    String code = "";
-    if (ue != null && !ue.equals("")) {
-      content = ue.split(" ");
-      System.out.println(Arrays.toString(content));
-      if (content.length > 0) {
-        if (content.length == 2) {
-          code = code.concat(content[0].substring(0, 1)).toUpperCase();
-          code = code.concat(content[1].substring(0, 2)).toUpperCase();
-        } else if (content.length >= 3) {
-          code = code.concat(content[0].substring(0, 1)).toUpperCase();
-          code = code.concat(content[1].substring(0, 1)).toUpperCase();
-          code = code.concat(content[content.length-1].substring(0, 1)).toUpperCase();
-        }
-      }
-    }
-    return code + " " + niveau + "" + semestreNum + "" + new DecimalFormat("00").format(ueOrderNum);
+  public String generateUECode(String codeUE, int niveau, int semestreNum, int ueOrderNum) {
+    return codeUE + " " + niveau + "" + semestreNum + "" + new DecimalFormat("00").format(ueOrderNum);
   }
 
   // generate Module code

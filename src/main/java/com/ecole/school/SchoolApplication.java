@@ -2,8 +2,11 @@ package com.ecole.school;
 
 import javax.annotation.Resource;
 
+import com.ecole.school.models.ProgrammeModule;
+import com.ecole.school.models.ProgrammeUE;
 import com.ecole.school.services.inscription.InscriptionService;
 import com.ecole.school.services.parametrages.ParametrageBaseService;
+import com.ecole.school.services.parametrages.ParametrageReferentielService;
 import com.ecole.school.services.utils.ExcelWriter;
 import com.ecole.school.services.utils.FileStorageService;
 
@@ -14,6 +17,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
+
+import java.util.List;
 
 @Log
 @SpringBootApplication
@@ -26,10 +31,40 @@ public class SchoolApplication implements CommandLineRunner {
 	private Utils utils;
 	@Autowired
 	private ExcelWriter excelWriter;
+/*	@Autowired
+	private ParametrageReferentielService parametrageReferentielService;*/
 
 	public static void main(String[] args) {
 		SpringApplication.run(SchoolApplication.class, args);
 	}
+
+	/**
+	 * correct programme ue code and programme module code
+	 */
+	/*private void setCodeToProgrammeUE() {
+		try {
+			List<ProgrammeUE> programmeUEList = parametrageReferentielService.findAllProgrammeUE();
+			programmeUEList.forEach(programmeUE -> {
+				programmeUE.setCode(
+					utils.generateUECode(programmeUE.getUe().getCode(),
+						programmeUE.getReferentiel().getNiveau().getNiveau(),
+						programmeUE.getSemestre().getNumero(),
+						programmeUE.getUe().getNumero()));
+				parametrageReferentielService.addProgrammeUE(programmeUE);
+			});
+
+			List<ProgrammeModule> programmeModuleList = parametrageReferentielService.findAllProgrammeModule();
+			programmeModuleList.forEach(programmeModule -> {
+				programmeModule.setCode(utils.generateModuleCode(
+					programmeModule.getProgrammeUE().getCode(),
+					programmeModule.getModule().getNumero()));
+
+				parametrageReferentielService.addProgrammeModule(programmeModule);
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}*/
 
 	@Override
 	public void run(String... args) throws Exception {
@@ -37,5 +72,6 @@ public class SchoolApplication implements CommandLineRunner {
 		storageService.deleteAll();
 		storageService.init();
 		excelWriter.generateReferentielUploadModel();
+		// setCodeToProgrammeUE();
 	}
 }

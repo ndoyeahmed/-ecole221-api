@@ -294,7 +294,8 @@ public class NotesController {
                 Integer totalCreditSemestre = notesService.getSommeCreditProgrammeUeBySemestre(semestre, inscription);
                 Integer totalCreditSemestreValide = notesService.getSommeCreditProgrammeUeNonValideBySemestre(semestre, inscription);
                 bulletinRecap.setValide(totalCreditSemestreValide != null && totalCreditSemestre!= null && totalCreditSemestreValide >= totalCreditSemestre);
-                bulletinRecap.setTotalCredit(totalCreditSemestreValide != null ? totalCreditSemestreValide : 0);
+                bulletinRecap.setTotalCredit(totalCreditSemestreValide);
+                bulletinRecap.setTotalCreditSemestre(totalCreditSemestre);
                 bulletinRecaps.add(bulletinRecap);
             });
             return ResponseEntity.ok(bulletinRecaps);

@@ -299,7 +299,7 @@ public class ParametrageReferentielController {
         if (programmeUE.getUe() == null || programmeUE.getUe().getId() == null)
             throw new BadRequestException("ue required");
 
-        programmeUE.setCode(utils.generateUECode(programmeUE.getUe().getLibelle(),
+        programmeUE.setCode(utils.generateUECode(programmeUE.getUe().getCode(),
                 programmeUE.getReferentiel().getNiveau().getNiveau(),
                 programmeUE.getSemestre().getNumero(),
                 programmeUE.getUe().getNumero()));
