@@ -445,4 +445,18 @@ public class NotesController {
         }
     }
 
+    @GetMapping("recap-semestre-inscription-valide/somme-credit/inscription/{inscriptionId}")
+    public ResponseEntity<?> getSumCreditRecapSemestreInscriptionValideByInscription(@PathVariable Long inscriptionId) {
+        try {
+            if (inscriptionId == null) throw new BadRequestException("inscription id required");
+            Inscription inscription = inscriptionService.findInscriptionById(inscriptionId);
+            if (inscription == null) throw new BadRequestException("inscription not found");
+
+            return ResponseEntity.ok(notesService.findSumCreditSemestreInscriptionByInscription(inscription));
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new InternalServerErrorException("internal server error");
+        }
+    }
+
 }

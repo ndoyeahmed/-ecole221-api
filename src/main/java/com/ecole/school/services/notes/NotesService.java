@@ -205,6 +205,10 @@ public class NotesService {
         return recapSemestreInscriptionValideRepository.findAllByInscription_Etudiant(etudiant).orElse(new ArrayList<>());
     }
 
+    public Integer findSumCreditSemestreInscriptionByInscription(Inscription inscription) {
+        return recapSemestreInscriptionValideRepository.findSumCreditByInscription(inscription).orElse(null);
+    }
+
     // ------------------ utils -----------------------------
     public List<NoteProgrammeModule> regulariseNote(List<List<ProgrammeModule>> pList, Inscription inscription) {
         List<NoteProgrammeModule> noteProgrammeModules = new ArrayList<>();
