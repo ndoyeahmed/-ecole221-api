@@ -201,6 +201,10 @@ public class NotesService {
         return recapSemestreInscriptionValideRepository.findBySemestreAndInscription(semestre, inscription).orElse(null);
     }
 
+    public List<RecapSemestreInscriptionValide> findAllRecapSemestreInscriptionValideByInscriptionEtudiant(Etudiant etudiant) {
+        return recapSemestreInscriptionValideRepository.findAllByInscription_Etudiant(etudiant).orElse(new ArrayList<>());
+    }
+
     // ------------------ utils -----------------------------
     public List<NoteProgrammeModule> regulariseNote(List<List<ProgrammeModule>> pList, Inscription inscription) {
         List<NoteProgrammeModule> noteProgrammeModules = new ArrayList<>();

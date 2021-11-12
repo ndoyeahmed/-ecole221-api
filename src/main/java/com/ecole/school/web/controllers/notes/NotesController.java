@@ -279,6 +279,51 @@ public class NotesController {
         }
     }
 
+    @GetMapping("bulletin/inscription/{idInscription}/semestre/{semestreId}")
+    public ResponseEntity<?> getAllInfosBulletinByInscriptionAndSemestre(@PathVariable Long idInscription, @PathVariable Long semestreId) {
+
+        try {
+            if (idInscription == null) throw new BadRequestException("idInscription required");
+            Inscription inscription = inscriptionService.findInscriptionById(idInscription);
+            if (inscription == null) throw new BadRequestException("idInscription incorrect");
+            Semestre semestre = parametrageSpecialiteService.findSemestreById(semestreId);
+            if (semestre == null) throw new BadRequestException("semestre id not correct");
+            List<NoteProgrammeModule> noteProgrammeModules = getAllNoteProgrammeModuleByInscriptionIdAndSemestre(idInscription, semestre);
+            List<RecapNoteProgrammeModuleByProgrammeUE> recapNoteProgrammeModuleByProgrammeUES = groupeNoteProgrammeModuleByProgrammeUe(noteProgrammeModules);
+            recapNoteProgrammeModuleByProgrammeUES.forEach(recapNoteProgrammeModuleByProgrammeUE -> {
+                recapNoteProgrammeModuleByProgrammeUE = notesService.getMoyenneUEByRecapNoteProgrammeModule(recapNoteProgrammeModuleByProgrammeUE);
+                notesService.checkAndSetValideProgrammeUE(inscription, recapNoteProgrammeModuleByProgrammeUE.getProgrammeUE(),
+                  recapNoteProgrammeModuleByProgrammeUE.getMoyenneUE());
+            });
+            Double sommeMoyenneUE = recapNoteProgrammeModuleByProgrammeUES.stream().mapToDouble(recap -> recap.getMoyenneUE()*recap.getProgrammeUE().getCredit()).sum();
+            Integer sommeCreditUE = recapNoteProgrammeModuleByProgrammeUES.stream().mapToInt(recap -> recap.getProgrammeUE().getCredit()).sum();
+            Double moyenneGeneral = sommeMoyenneUE / sommeCreditUE;
+            moyenneGeneral = notesService.formateFloatNumber(moyenneGeneral);
+            BulletinInscription bulletinInscription = new BulletinInscription(recapNoteProgrammeModuleByProgrammeUES, moyenneGeneral);
+            return ResponseEntity.ok(bulletinInscription);
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new InternalServerErrorException("Internal server error");
+        }
+    }
+
+    private List<NoteProgrammeModule> getAllNoteProgrammeModuleByInscriptionIdAndSemestre(Long inscriptionId, Semestre semestre) {
+        if (inscriptionId == null) throw new BadRequestException("inscriptionId required");
+
+        Inscription inscription = inscriptionService.findInscriptionById(inscriptionId);
+        if (inscription == null) throw new BadRequestException("inscription not found");
+
+        List<ClasseSousClasse> classeSousClasseList = parametrageClasseService.findAllClasseSousClasseBySousClasse(inscription.getSousClasse());
+        if (classeSousClasseList.size() <= 0) throw new BadRequestException("classesousclasse not found");
+        Classe classe = classeSousClasseList.get(0).getClasse();
+        AnneeScolaire anneeScolaire = inscription.getAnneeScolaire();
+        ClasseReferentiel classeReferentiel = parametrageClasseService.findClasseReferentielByClasseAndAnneeScolaire(classe, anneeScolaire);
+        if (classeReferentiel == null) throw new BadRequestException("classe not affected to a referentiel");
+
+        return notesService.findAllNoteProgrammeModuleByInsAnneeRefSemestre(
+          inscription, anneeScolaire, classeReferentiel.getReferentiel(), semestre);
+    }
+
     @GetMapping("bulletin-recap/inscription/{idInscription}")
     public ResponseEntity<?> getRecapBulletinByInscription(@PathVariable Long idInscription) {
 
@@ -288,15 +333,26 @@ public class NotesController {
             if (inscription == null) throw new BadRequestException("idInscription incorrect");
             List<Semestre> semestres = parametrageSpecialiteService.findAllSemestre();
             List<BulletinRecap> bulletinRecaps = new ArrayList<>();
+
             semestres.forEach(semestre -> {
-                BulletinRecap bulletinRecap = new BulletinRecap();
+                BulletinRecap bulletinRecap = new BulletinRecap(); // get new recap bulletin for display
+                RecapSemestreInscriptionValide recapSemestreInscriptionValide = notesService
+                  .findRecapSemestreInscriptionValideBySemestreAndInscription(semestre, inscription);
+                if (recapSemestreInscriptionValide == null) {
+                    recapSemestreInscriptionValide = new RecapSemestreInscriptionValide();
+                }
+                recapSemestreInscriptionValide.setInscription(inscription);
+                recapSemestreInscriptionValide.setSemestre(semestre);
                 bulletinRecap.setSemestre(semestre);
                 Integer totalCreditSemestre = notesService.getSommeCreditProgrammeUeBySemestre(semestre, inscription);
                 Integer totalCreditSemestreValide = notesService.getSommeCreditProgrammeUeNonValideBySemestre(semestre, inscription);
                 bulletinRecap.setValide(totalCreditSemestreValide != null && totalCreditSemestre!= null && totalCreditSemestreValide >= totalCreditSemestre);
+                recapSemestreInscriptionValide.setValide(totalCreditSemestreValide != null && totalCreditSemestre!= null && totalCreditSemestreValide >= totalCreditSemestre);
                 bulletinRecap.setTotalCredit(totalCreditSemestreValide);
+                recapSemestreInscriptionValide.setNombreCreditSemestre(totalCreditSemestreValide);
                 bulletinRecap.setTotalCreditSemestre(totalCreditSemestre);
                 bulletinRecaps.add(bulletinRecap);
+                notesService.addRecapSemestreInscriptionValide(recapSemestreInscriptionValide); // add or update the recap for semestre inscription valid
             });
             return ResponseEntity.ok(bulletinRecaps);
         } catch (Exception e) {
@@ -372,6 +428,21 @@ public class NotesController {
         });
 
         return recapNoteProgrammeModuleByProgrammeUES;
+    }
+
+    // ------------------------------ recap semestre inscription valide -----------------------------------------------
+    @GetMapping("recap-semestre-inscription-valide/inscription/etudiant/{etudiantId}")
+    public ResponseEntity<?> getAllRecapSemestreInscriptionValideByInscriptionEtudiant(@PathVariable Long etudiantId) {
+        try {
+            if (etudiantId == null) throw new BadRequestException("etudiant id required");
+            Etudiant etudiant = inscriptionService.findEtudiantById(etudiantId);
+            if (etudiant == null) throw new BadRequestException("etudiant not found");
+
+            return ResponseEntity.ok(notesService.findAllRecapSemestreInscriptionValideByInscriptionEtudiant(etudiant));
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new InternalServerErrorException("internal server error");
+        }
     }
 
 }

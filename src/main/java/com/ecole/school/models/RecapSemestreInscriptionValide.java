@@ -13,7 +13,7 @@ public class RecapSemestreInscriptionValide {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
   private boolean valide;
-  private Double nombreCreditSemestre;
+  private Integer nombreCreditSemestre;
 
   @ManyToOne
   @JoinColumn(name = "semestre", referencedColumnName = "id")
