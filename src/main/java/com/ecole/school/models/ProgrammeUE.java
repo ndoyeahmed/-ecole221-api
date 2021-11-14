@@ -33,4 +33,5 @@ public class ProgrammeUE {
     @ManyToOne
     @JoinColumn(name = "ue", referencedColumnName = "id")
     private UE ue;
+
 }

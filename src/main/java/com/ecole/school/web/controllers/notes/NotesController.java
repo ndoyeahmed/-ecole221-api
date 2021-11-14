@@ -23,6 +23,7 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -265,7 +266,9 @@ public class NotesController {
             recapNoteProgrammeModuleByProgrammeUES.forEach(recapNoteProgrammeModuleByProgrammeUE -> {
                 recapNoteProgrammeModuleByProgrammeUE = notesService.getMoyenneUEByRecapNoteProgrammeModule(recapNoteProgrammeModuleByProgrammeUE);
                 notesService.checkAndSetValideProgrammeUE(inscription, recapNoteProgrammeModuleByProgrammeUE.getProgrammeUE(),
-                  recapNoteProgrammeModuleByProgrammeUE.getMoyenneUE());
+                  recapNoteProgrammeModuleByProgrammeUE.getMoyenneUE(), recapNoteProgrammeModuleByProgrammeUE);
+                recapNoteProgrammeModuleByProgrammeUE.setValide(!notesService.haveZeroInOneModule(recapNoteProgrammeModuleByProgrammeUE)
+                                                                && recapNoteProgrammeModuleByProgrammeUE.getMoyenneUE() >= 10);
             });
             Double sommeMoyenneUE = recapNoteProgrammeModuleByProgrammeUES.stream().mapToDouble(recap -> recap.getMoyenneUE()*recap.getProgrammeUE().getCredit()).sum();
             Integer sommeCreditUE = recapNoteProgrammeModuleByProgrammeUES.stream().mapToInt(recap -> recap.getProgrammeUE().getCredit()).sum();
@@ -293,12 +296,18 @@ public class NotesController {
             recapNoteProgrammeModuleByProgrammeUES.forEach(recapNoteProgrammeModuleByProgrammeUE -> {
                 recapNoteProgrammeModuleByProgrammeUE = notesService.getMoyenneUEByRecapNoteProgrammeModule(recapNoteProgrammeModuleByProgrammeUE);
                 notesService.checkAndSetValideProgrammeUE(inscription, recapNoteProgrammeModuleByProgrammeUE.getProgrammeUE(),
-                  recapNoteProgrammeModuleByProgrammeUE.getMoyenneUE());
+                  recapNoteProgrammeModuleByProgrammeUE.getMoyenneUE(), recapNoteProgrammeModuleByProgrammeUE);
+                recapNoteProgrammeModuleByProgrammeUE.setValide(!notesService.haveZeroInOneModule(recapNoteProgrammeModuleByProgrammeUE)
+                                                                && recapNoteProgrammeModuleByProgrammeUE.getMoyenneUE() >= 10);
             });
             Double sommeMoyenneUE = recapNoteProgrammeModuleByProgrammeUES.stream().mapToDouble(recap -> recap.getMoyenneUE()*recap.getProgrammeUE().getCredit()).sum();
             Integer sommeCreditUE = recapNoteProgrammeModuleByProgrammeUES.stream().mapToInt(recap -> recap.getProgrammeUE().getCredit()).sum();
             Double moyenneGeneral = sommeMoyenneUE / sommeCreditUE;
             moyenneGeneral = notesService.formateFloatNumber(moyenneGeneral);
+            Collections.sort(recapNoteProgrammeModuleByProgrammeUES);
+            recapNoteProgrammeModuleByProgrammeUES.forEach(recapNoteProgrammeModuleByProgrammeUE -> {
+                Collections.sort(recapNoteProgrammeModuleByProgrammeUE.getNoteProgrammeModules());
+            });
             BulletinInscription bulletinInscription = new BulletinInscription(recapNoteProgrammeModuleByProgrammeUES, moyenneGeneral);
             return ResponseEntity.ok(bulletinInscription);
         } catch (Exception e) {

@@ -257,9 +257,16 @@ public class NotesService {
         return noteProgrammeModules;
     }
 
+    public boolean haveZeroInOneModule(RecapNoteProgrammeModuleByProgrammeUE recapNoteProgrammeModuleByProgrammeUE) {
+        for (NoteProgrammeModule noteProgrammeModule : recapNoteProgrammeModuleByProgrammeUE.getNoteProgrammeModules()) {
+            if (noteProgrammeModule.getNote().getMds() == 0 || noteProgrammeModule.getNote().getNef() == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-
-    public ProgrammeUEInscription checkAndSetValideProgrammeUE(Inscription inscription, ProgrammeUE programmeUE, double moyenneUE) {
+    public ProgrammeUEInscription checkAndSetValideProgrammeUE(Inscription inscription, ProgrammeUE programmeUE, double moyenneUE, RecapNoteProgrammeModuleByProgrammeUE recapNoteProgrammeModuleByProgrammeUE) {
         ProgrammeUEInscription programmeUEInscription = findProgrammeUEInscriptionByProgrammeUEAndInscription(programmeUE, inscription);
         if (programmeUEInscription == null) {
             programmeUEInscription = new ProgrammeUEInscription();
@@ -268,7 +275,7 @@ public class NotesService {
             programmeUEInscription.setArchive(false);
         }
 
-        programmeUEInscription.setValide(moyenneUE >= 10);
+        programmeUEInscription.setValide(!haveZeroInOneModule(recapNoteProgrammeModuleByProgrammeUE) && moyenneUE >= 10);
 
         addProgrammeUEInscription(programmeUEInscription);
 

@@ -43,7 +43,7 @@ public class SchoolApplication implements CommandLineRunner {
 	 */
 	/*private void setCodeToProgrammeUE() {
 		try {
-			List<ProgrammeUE> programmeUEList = parametrageReferentielService.findAllProgrammeUE();
+			*//*List<ProgrammeUE> programmeUEList = parametrageReferentielService.findAllProgrammeUE();
 			programmeUEList.forEach(programmeUE -> {
 				programmeUE.setCode(
 					utils.generateUECode(programmeUE.getUe().getCode(),
@@ -51,13 +51,13 @@ public class SchoolApplication implements CommandLineRunner {
 						programmeUE.getSemestre().getNumero(),
 						programmeUE.getUe().getNumero()));
 				parametrageReferentielService.addProgrammeUE(programmeUE);
-			});
+			});*//*
 
 			List<ProgrammeModule> programmeModuleList = parametrageReferentielService.findAllProgrammeModule();
 			programmeModuleList.forEach(programmeModule -> {
 				programmeModule.setCode(utils.generateModuleCode(
 					programmeModule.getProgrammeUE().getCode(),
-					programmeModule.getModule().getNumero()));
+					Integer.parseInt(programmeModule.getNum())));
 
 				parametrageReferentielService.addProgrammeModule(programmeModule);
 			});
@@ -72,6 +72,6 @@ public class SchoolApplication implements CommandLineRunner {
 		storageService.deleteAll();
 		storageService.init();
 		excelWriter.generateReferentielUploadModel();
-		// setCodeToProgrammeUE();
+//		 setCodeToProgrammeUE();
 	}
 }

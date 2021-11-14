@@ -7,8 +7,20 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class RecapNoteProgrammeModuleByProgrammeUE {
+public class RecapNoteProgrammeModuleByProgrammeUE implements Comparable<RecapNoteProgrammeModuleByProgrammeUE> {
   private ProgrammeUE programmeUE;
   private List<NoteProgrammeModule> noteProgrammeModules;
   private double moyenneUE;
+  private boolean valide;
+
+  @Override
+  public int compareTo(RecapNoteProgrammeModuleByProgrammeUE o) {
+    int compareNum = o.getProgrammeUE().getNum();
+
+    //ascending order
+    return this.programmeUE.getNum() - compareNum;
+
+    //descending order
+    //return compareNum - this.num;
+  }
 }
