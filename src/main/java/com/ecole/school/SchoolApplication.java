@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.List;
@@ -23,7 +25,7 @@ import java.util.List;
 @Log
 @SpringBootApplication
 @EnableAsync
-public class SchoolApplication implements CommandLineRunner {
+public class SchoolApplication extends SpringBootServletInitializer implements CommandLineRunner{
 
 	@Resource
 	FileStorageService storageService;
@@ -36,6 +38,11 @@ public class SchoolApplication implements CommandLineRunner {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SchoolApplication.class, args);
+	}
+
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+		return builder.sources(SchoolApplication.class);
 	}
 
 	/**
