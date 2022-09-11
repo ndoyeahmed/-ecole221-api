@@ -6,6 +6,9 @@ import com.ecole.school.repositories.ProfilRepository;
 import com.ecole.school.repositories.UtilisateurRepository;
 import com.ecole.school.services.MailService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -69,6 +72,16 @@ public class UtilisateurService {
         }
     }
 
+    public Profil addProfil(Profil profil) {
+        try {
+            profilRepository.save(profil);
+            return profil;
+        } catch (Exception e) {
+            log.severe(e.getLocalizedMessage());
+            throw e;
+        }
+    }
+
     public Profil findProfilById(Long id) {
         return profilRepository.findById(id).orElse(null);
     }
@@ -79,5 +92,9 @@ public class UtilisateurService {
 
     public Utilisateur findUserByCinAndProfil(String cin, Profil profil) {
         return utilisateurRepository.findByCinAndArchiveFalseAndProfil(cin, profil).orElse(null);
+    }
+
+    public List<Utilisateur> findAllUserByEtat(Boolean etat) {
+        return utilisateurRepository.findAllByEtat(etat).orElse(new ArrayList<>());
     }
 }

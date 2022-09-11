@@ -2,6 +2,7 @@ package com.ecole.school;
 
 import javax.annotation.Resource;
 
+import com.ecole.school.fixtures.UtilisateurFixture;
 import com.ecole.school.models.ProgrammeModule;
 import com.ecole.school.models.ProgrammeUE;
 import com.ecole.school.services.inscription.InscriptionService;
@@ -35,6 +36,8 @@ public class SchoolApplication extends SpringBootServletInitializer implements C
 	private Utils utils;
 	@Autowired
 	private ExcelWriter excelWriter;
+	@Autowired
+	private UtilisateurFixture utilisateurFixture;
 /*	@Autowired
 	private ParametrageReferentielService parametrageReferentielService;*/
 
@@ -86,7 +89,8 @@ public class SchoolApplication extends SpringBootServletInitializer implements C
 	@Override
 	public void run(String... args) throws Exception {
 //		System.out.println(utils.generateUECode("Système Informations", 1, 1, 4));
-		log.log(Level.INFO, bCryptPasswordEncoder.encode("passer"));
+		// log.log(Level.INFO, bCryptPasswordEncoder.encode("passer"));
+		utilisateurFixture.userFixture();
 		storageService.deleteAll();
 		storageService.init();
 		excelWriter.generateReferentielUploadModel();

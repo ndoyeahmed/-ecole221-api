@@ -1,5 +1,6 @@
 package com.ecole.school.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.ecole.school.models.Profil;
@@ -16,4 +17,7 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
     Optional<Utilisateur> connexion(@Param("login") String login, @Param("etat") Boolean etat);
 
     Optional<Utilisateur> findByCinAndArchiveFalseAndProfil(String cin, Profil profil);
+
+    @Query("SELECT u FROM Utilisateur u WHERE u.etat=:etat")
+    Optional<List<Utilisateur>> findAllByEtat(@Param("etat") Boolean etat);
 }
