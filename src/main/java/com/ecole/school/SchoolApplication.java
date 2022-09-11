@@ -19,8 +19,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
+import java.util.logging.Level;
 
 @Log
 @SpringBootApplication
@@ -35,6 +37,14 @@ public class SchoolApplication extends SpringBootServletInitializer implements C
 	private ExcelWriter excelWriter;
 /*	@Autowired
 	private ParametrageReferentielService parametrageReferentielService;*/
+
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+	@Autowired
+	public void setBCryptPasswordEncoder(BCryptPasswordEncoder bCryptPasswordEncoder) {
+	  this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+	  // $2a$10$dQWHrvibJInQdM85ZE/Ak./LD7./RAnFCD0QeBSwwvLgk9I8OxHeq
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(SchoolApplication.class, args);
@@ -76,6 +86,7 @@ public class SchoolApplication extends SpringBootServletInitializer implements C
 	@Override
 	public void run(String... args) throws Exception {
 //		System.out.println(utils.generateUECode("Système Informations", 1, 1, 4));
+		log.log(Level.INFO, bCryptPasswordEncoder.encode("passer"));
 		storageService.deleteAll();
 		storageService.init();
 		excelWriter.generateReferentielUploadModel();
