@@ -59,6 +59,10 @@ public class UtilisateurService {
         }
     }
 
+    public Utilisateur findUserByCin(String cin) {
+        return utilisateurRepository.findByCinAndArchiveFalse(cin).orElse(null);
+    }
+
     public void email(Utilisateur utilisateur, String password){
         try {
             String subject = "Confirmation de votre inscription";

@@ -1,6 +1,6 @@
-INSERT INTO tbl_countries
+INSERT INTO ecole221_prod.pays
  
-(name)
+(libelle)
  
 VALUES
  

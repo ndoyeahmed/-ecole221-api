@@ -291,7 +291,9 @@ public class NotesController {
             if (inscription == null) throw new BadRequestException("idInscription incorrect");
             Semestre semestre = parametrageSpecialiteService.findSemestreById(semestreId);
             if (semestre == null) throw new BadRequestException("semestre id not correct");
+
             List<NoteProgrammeModule> noteProgrammeModules = getAllNoteProgrammeModuleByInscriptionIdAndSemestre(idInscription, semestre);
+            System.out.println(noteProgrammeModules);
             List<RecapNoteProgrammeModuleByProgrammeUE> recapNoteProgrammeModuleByProgrammeUES = groupeNoteProgrammeModuleByProgrammeUe(noteProgrammeModules);
             recapNoteProgrammeModuleByProgrammeUES.forEach(recapNoteProgrammeModuleByProgrammeUE -> {
                 recapNoteProgrammeModuleByProgrammeUE = notesService.getMoyenneUEByRecapNoteProgrammeModule(recapNoteProgrammeModuleByProgrammeUE);
@@ -311,7 +313,8 @@ public class NotesController {
             BulletinInscription bulletinInscription = new BulletinInscription(recapNoteProgrammeModuleByProgrammeUES, moyenneGeneral);
             return ResponseEntity.ok(bulletinInscription);
         } catch (Exception e) {
-            log.severe(e.getMessage());
+            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
             throw new InternalServerErrorException("Internal server error");
         }
     }

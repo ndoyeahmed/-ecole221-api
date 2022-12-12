@@ -28,6 +28,7 @@ import com.ecole.school.web.POJO.ChangeClasse;
 import com.ecole.school.web.POJO.InscriptionPOJO;
 import com.ecole.school.web.exceptions.BadRequestException;
 import com.ecole.school.web.exceptions.EntityNotFoundException;
+import com.ecole.school.web.exceptions.InternalServerErrorException;
 
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +97,53 @@ public class InscriptionController {
     }
 
     // -------------Inscription ENDPOINTS
+
+    @PutMapping("etudiant/edit/{cin}")
+    public ResponseEntity<?> editUser(@PathVariable String cin, @RequestBody Etudiant etudiant) {
+        try {
+            Etudiant etudiantEdit = inscriptionService.findEtudiantByCin(cin);
+        if (etudiant == null) throw new BadRequestException("etudiant not found");
+        Utilisateur utilisateur = utilisateurService.findUserByCin(cin);
+        if (utilisateur == null) throw new BadRequestException("user not found");
+
+        etudiantEdit.setCin(etudiant.getCin());
+        etudiantEdit.setNom(etudiant.getNom());
+        etudiantEdit.setPrenom(etudiant.getPrenom());
+        etudiantEdit.setEmail(etudiant.getEmail());
+        etudiantEdit.setAbandon(etudiant.getAbandon());
+        etudiantEdit.setAmbition(etudiant.getAmbition());
+        etudiantEdit.setAutresRenseignements(etudiant.getAutresRenseignements());
+        etudiantEdit.setDateNaissance(etudiant.getDateNaissance());
+        etudiantEdit.setEmailPro(etudiant.getEmailPro());
+        etudiantEdit.setEtablissementPrecedent(etudiant.getEtablissementPrecedent());
+        etudiantEdit.setFileType(etudiant.getFileType());
+        etudiantEdit.setGenre(etudiant.getGenre());
+        etudiantEdit.setLieuNaissance(etudiant.getLieuNaissance());
+        etudiantEdit.setMetier(etudiant.getMetier());
+        etudiantEdit.setMotifEntree(etudiant.getMotifEntree());
+        etudiantEdit.setNiveauEntree(etudiant.getNiveauEntree());
+        etudiantEdit.setPays(etudiant.getPays());
+        etudiantEdit.setPhoto(etudiant.getPhoto());
+        etudiantEdit.setTelephone(etudiant.getTelephone());
+
+        inscriptionService.addEtudiant(etudiantEdit);
+
+        utilisateur.setCin(etudiant.getCin());
+        utilisateur.setEmail(etudiant.getEmail());
+        utilisateur.setNom(etudiant.getNom());
+        utilisateur.setPrenom(etudiant.getPrenom());
+        utilisateur.setTelephone(etudiant.getTelephone());
+        utilisateur.setLogin(etudiant.getEmail());
+
+        utilisateurService.addUser(utilisateur);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(Collections.singletonMap("response", true));
+        } catch (Exception e) {
+           log.severe(e.getLocalizedMessage());
+           throw new InternalServerErrorException("internal server error");
+        }
+    }
+
     @PostMapping("inscription")
     public ResponseEntity<?> inscription(@RequestBody InscriptionPOJO inscriptionPOJO)
             throws FileNotFoundException, IOException, InterruptedException {

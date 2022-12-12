@@ -20,4 +20,7 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
 
     @Query("SELECT u FROM Utilisateur u WHERE u.etat=:etat")
     Optional<List<Utilisateur>> findAllByEtat(@Param("etat") Boolean etat);
+
+    @Query("SELECT u FROM Utilisateur u WHERE u.etat=true and u.cin=:cin and u.archive=false")
+    Optional<Utilisateur> findByCinAndArchiveFalse(@Param("cin") String cin);
 }

@@ -97,7 +97,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "https://ecole221-web.vercel.app/",
-                "http://cloud-28a1it3y.hosteur.net"));
+                "http://cloud-28a1it3y.hosteur.net", "http://ges221.com"));
         // configuration.setAllowedOrigins(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
