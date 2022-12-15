@@ -14,8 +14,8 @@ import java.util.function.Function;
 @Service
 public class JwtUtil {
   private String SECRET_KEY = "achatApi";
-  // EXPIRATION = 10 jours = 240 heures = 14400 minutes
-  private final long EXPIRATION = 864_000_000;
+  // EXPIRATION = 24 hours
+  private final long EXPIRATION = 10 * 60 * 60;
 
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
@@ -45,8 +45,8 @@ public class JwtUtil {
 
   private String createToken(Map<String, Object> claims, String subject) {
     return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-      .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-      .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
+      .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION * 1000))
+      .signWith(SignatureAlgorithm.HS512, SECRET_KEY).compact();
   }
 
   public Boolean validateToken(String token, UserDetails userDetails) {
