@@ -167,7 +167,7 @@ public class InscriptionController {
                     utils.genereMatriculeEtudiant(inscriptionPOJO.getSousClasse().getSpecialite().getNum(),
                             anneeScolaire.getAnnee() + "", inscriptionService.findAllEtudiant()));
 
-            etudiant = inscriptionService.addEtudiant(etudiant);
+            // etudiant = inscriptionService.addEtudiant(etudiant);
 
             // upload photo profil etudiant
             if (etudiant.getPhoto() != null && !etudiant.getPhoto().trim().equals("")) {
@@ -199,6 +199,8 @@ public class InscriptionController {
                 etudiant.setPhoto(directory);
             }
             // end upload
+
+            etudiant = inscriptionService.addEtudiant(etudiant);
 
             // create compte etudiant
             Profil profilEtudiant = utilisateurService.findProfilByLibelle("ETUDIANT");
