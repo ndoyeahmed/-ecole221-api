@@ -32,7 +32,7 @@ public class SwaggerConfig {
                 "A RESTFUL API for school management.",
                 "API TOS",
                 "Terms of service",
-                new Contact("Mouhamed Ndoye", "www.example.com", "ndoyeahmed2602@gmail.com"),
+                new Contact("Mouhamed Ndoye", "www.mouhamedndoye.com", "ndoyeahmed2602@gmail.com"),
                 "License of API", "API license URL", new ArrayList<>());
     }
 }

@@ -14,12 +14,15 @@ import com.ecole.school.services.utils.FileInfo;
 import com.ecole.school.services.utils.FileStorageService;
 import com.ecole.school.web.POJO.ResponseMessage;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,6 +76,20 @@ public class FilesController {
     return ResponseEntity.status(HttpStatus.OK).body(fileInfos);
   }
 
+  
+  // @GetMapping("/files/{filename:.+}")
+  @PostMapping(value="/files/myfile")
+  public @ResponseBody byte[] getFileByNamePost(@RequestBody String filename) throws IOException {
+    Resource file = storageService.load(filename);
+    try {
+      
+      InputStream in = file.getInputStream();
+    return IOUtils.toByteArray(in);
+    } catch (IOException e) {
+      throw e;
+    }
+  }
+
   @GetMapping("/files/{filename:.+}")
   @ResponseBody
   public ResponseEntity<Resource> getFile(@PathVariable String filename) {
@@ -84,11 +101,11 @@ public class FilesController {
   @PutMapping("/files/base64")
   public ResponseEntity<?> getImages(@RequestBody String filename) {
     try {
-
+      
       final InputStream inputStream = new FileInputStream(filename);
       final byte[] bytes = IOUtils.toByteArray(inputStream);
       final String encodedImage = Base64.getEncoder().encodeToString(bytes);
-
+      
       return ResponseEntity.ok(Collections.singletonMap("response", encodedImage));
 
     } catch (Exception e) {

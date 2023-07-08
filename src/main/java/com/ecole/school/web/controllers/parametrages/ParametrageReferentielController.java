@@ -88,39 +88,23 @@ public class ParametrageReferentielController {
         List<ProgrammeUE> programmeUEs = parametrageReferentielService.findAllProgrammeUEByReferentiel(oldRef);
         if (!programmeUEs.isEmpty()) {
             // clone programme ue and programme module
-            programmeUEs.parallelStream().forEach(x -> {
+            for(ProgrammeUE x : programmeUEs) {
                 List<ProgrammeModule> programmeModules = parametrageReferentielService
                         .findAllProgrammeModuleByProgrammeUE(x.getId());
                 ProgrammeUE pu = new ProgrammeUE();
                 pu.setArchive(x.isArchive());
-                try {
-                    pu.setCode(utils.generateUniqueId());
-                } catch (UnsupportedEncodingException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (NoSuchAlgorithmException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                pu.setCode(x.getCode());
                 pu.setCredit(x.getCredit());
                 pu.setFondamental(x.getFondamental());
                 pu.setNbreHeureUE(x.getNbreHeureUE());
                 pu.setUe(x.getUe());
                 pu.setSemestre(x.getSemestre());
                 pu.setReferentiel(newRef);
-                parametrageReferentielService.addProgrammeUE(pu);
+                pu = parametrageReferentielService.addProgrammeUE(pu);
                 if (!programmeModules.isEmpty()) {
                     for (ProgrammeModule pm : programmeModules) {
                         ProgrammeModule prModule = new ProgrammeModule();
-                        try {
-                            prModule.setCode(utils.generateUniqueId());
-                        } catch (UnsupportedEncodingException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        } catch (NoSuchAlgorithmException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
+                        prModule.setCode(pm.getCode());
                         prModule.setBudget(pm.getBudget());
                         prModule.setCoef(pm.getCoef());
                         prModule.setNbreCreditModule(pm.getNbreCreditModule());
@@ -131,10 +115,10 @@ public class ParametrageReferentielController {
                         prModule.setVht(pm.getVht());
                         prModule.setModule(pm.getModule());
                         prModule.setProgrammeUE(pu);
-                        parametrageReferentielService.addProgrammeModule(pm);
+                        parametrageReferentielService.addProgrammeModule(prModule);
                     }
                 }
-            });
+            }
         }
     }
 
