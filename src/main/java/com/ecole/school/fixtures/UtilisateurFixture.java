@@ -25,7 +25,7 @@ public class UtilisateurFixture {
     }
 
     public void userFixture() {
-        if (utilisateurService.findAllUserByEtat(true).size() <= 0) {
+        if (utilisateurService.findAllUserByEtat(true).size() == 0) {
             addDefaultAdminUser();
             addDefaultSecretaireUser();
         }

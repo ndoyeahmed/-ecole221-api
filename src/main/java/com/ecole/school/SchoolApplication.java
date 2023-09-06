@@ -91,8 +91,8 @@ public class SchoolApplication extends SpringBootServletInitializer implements C
 //		System.out.println(utils.generateUECode("Système Informations", 1, 1, 4));
 		// log.log(Level.INFO, bCryptPasswordEncoder.encode("passer"));
 		utilisateurFixture.userFixture();
-		storageService.deleteAll();
-		storageService.init();
+		//storageService.deleteAll();
+		//storageService.init();
 		excelWriter.generateReferentielUploadModel();
 //		 setCodeToProgrammeUE();
 	}
