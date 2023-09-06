@@ -175,24 +175,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals><goal>copy</goal></goals>
-						<configuration>
-							<artfactItem>
-								<groupId>com.heroku</groupId>
-								<artifactId>webapp-runner</artifactId>
-								<version>9.0.30.0</version>
-								<destFileName>webapp-runner.jar</destFileName>
-							</artfactItem>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.12.4</version>
 				<configuration>
