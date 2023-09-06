@@ -191,12 +191,7 @@
 									<version>9.0.27.1</version>
 									<destFileName>webapp-runner.jar</destFileName>
 								</artifactItem>
-								<artifactItem>
-									<groupId>com.github.heroku</groupId>
-									<artifactId>webapp-runner-main</artifactId>
-									<version>9.0.27.1</version>
-									<destFileName>webapp-runner.jar</destFileName>
-								</artifactItem>
+
 							</artifactItems>
 						</configuration>
 					</execution>
