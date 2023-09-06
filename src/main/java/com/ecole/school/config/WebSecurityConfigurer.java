@@ -96,7 +96,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "https://ecole221-web.vercel.app/",
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "https://ecole221-web.vercel.app/", "https://ecole221-web.vercel.app",
                 "http://cloud-28a1it3y.hosteur.net", "https://gesaf221.com/", "https://gesaf221.com", "http://localhost/ecole221", "http://localhost/ecole221/",
                 "http://localhost", "http://localhost/", "http://172.20.10.2:4200", "http://172.20.10.2:4200/"));
         // configuration.setAllowedOrigins(Arrays.asList("*"));
